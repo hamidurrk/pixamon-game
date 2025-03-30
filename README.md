@@ -1,8 +1,8 @@
-# Lutemon
+# Lutemon - A Retro-Style Pixel Art Game
 
 A [libGDX](https://libgdx.com/) project generated with [gdx-liftoff](https://github.com/libgdx/gdx-liftoff).
 
-This project was generated with a template including simple application launchers and an `ApplicationAdapter` extension that draws libGDX logo.
+This project was generated with a template including simple application launchers and an `ApplicationAdapter` extension that draws libGDX logo. After the initial installation, `core` and `android` has been programmed accordingly.
 
 ## Platforms
 
