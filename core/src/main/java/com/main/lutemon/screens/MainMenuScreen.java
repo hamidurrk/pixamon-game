@@ -20,17 +20,17 @@ public class MainMenuScreen implements Screen {
     public MainMenuScreen(LutemonGame game) {
         this.game = game;
         this.camera = new OrthographicCamera();
-        this.camera.setToOrtho(false, Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT);
+        this.camera.setToOrtho(false, Constants.getScreenWidth(), Constants.getScreenHeight());
         initialize();
     }
 
     private void initialize() {
-        stage = new Stage(new FitViewport(Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT, camera));
+        stage = new Stage(new FitViewport(Constants.getScreenWidth(), Constants.getScreenHeight(), camera));
         Gdx.input.setInputProcessor(stage);
-        
+
         // Load background
         backgroundTexture = game.getAssetLoader().getBackground("main_menu");
-        
+
         createUI();
     }
 
@@ -39,8 +39,8 @@ public class MainMenuScreen implements Screen {
         table.setFillParent(true);
 
         // Title
-        Label titleLabel = new Label("Lutemon Game", game.getAssetLoader().getSkin());
-        table.add(titleLabel).pad(50);
+        Label titleLabel = new Label("Lutemon Game", game.getAssetLoader().getSkin(), "title");
+        table.add(titleLabel).pad(Constants.getPadding() * 5);
         table.row();
 
         // Buttons
@@ -71,11 +71,11 @@ public class MainMenuScreen implements Screen {
             return true;
         });
 
-        table.add(newGameButton).pad(10).width(Constants.BUTTON_WIDTH);
+        table.add(newGameButton).pad(Constants.getPadding()).width(Constants.getButtonWidth());
         table.row();
-        table.add(loadGameButton).pad(10).width(Constants.BUTTON_WIDTH);
+        table.add(loadGameButton).pad(Constants.getPadding()).width(Constants.getButtonWidth());
         table.row();
-        table.add(exitButton).pad(10).width(Constants.BUTTON_WIDTH);
+        table.add(exitButton).pad(Constants.getPadding()).width(Constants.getButtonWidth());
 
         stage.addActor(table);
     }
@@ -99,7 +99,7 @@ public class MainMenuScreen implements Screen {
         // Draw background
         game.getBatch().setProjectionMatrix(camera.combined);
         game.getBatch().begin();
-        game.getBatch().draw(backgroundTexture, 0, 0, Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT);
+        game.getBatch().draw(backgroundTexture, 0, 0, Constants.getScreenWidth(), Constants.getScreenHeight());
         game.getBatch().end();
 
         // Draw UI
@@ -109,7 +109,13 @@ public class MainMenuScreen implements Screen {
 
     @Override
     public void resize(int width, int height) {
+        // Update camera and viewport
+        camera.setToOrtho(false, width, height);
         stage.getViewport().update(width, height, true);
+
+        // Recreate UI to adjust to new screen size
+        stage.clear();
+        createUI();
     }
 
     @Override
@@ -129,4 +135,4 @@ public class MainMenuScreen implements Screen {
     public void resume() {}
     @Override
     public void hide() {}
-} 
+}

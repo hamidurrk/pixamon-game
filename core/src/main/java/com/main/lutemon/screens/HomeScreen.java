@@ -25,7 +25,7 @@ public class HomeScreen implements Screen {
     public HomeScreen(LutemonGame game) {
         this.game = game;
         this.camera = new OrthographicCamera();
-        this.camera.setToOrtho(false, Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT);
+        this.camera.setToOrtho(false, Constants.getScreenWidth(), Constants.getScreenHeight());
         initialize();
 
         // Create home fragment
@@ -34,7 +34,7 @@ public class HomeScreen implements Screen {
     }
 
     private void initialize() {
-        stage = new Stage(new FitViewport(Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT, camera));
+        stage = new Stage(new FitViewport(Constants.getScreenWidth(), Constants.getScreenHeight(), camera));
         Gdx.input.setInputProcessor(stage);
 
         // Load background
@@ -48,8 +48,8 @@ public class HomeScreen implements Screen {
         table.setFillParent(true);
 
         // Title
-        Label titleLabel = new Label("Home", game.getAssetLoader().getSkin());
-        table.add(titleLabel).pad(20);
+        Label titleLabel = new Label("Home", game.getAssetLoader().getSkin(), "title");
+        table.add(titleLabel).pad(Constants.getPadding() * 2);
         table.row();
 
         // Buttons
@@ -78,13 +78,13 @@ public class HomeScreen implements Screen {
             return true;
         });
 
-        table.add(createButton).pad(10).width(Constants.BUTTON_WIDTH);
+        table.add(createButton).pad(10).width(Constants.getButtonWidth());
         table.row();
-        table.add(trainButton).pad(10).width(Constants.BUTTON_WIDTH);
+        table.add(trainButton).pad(10).width(Constants.getButtonWidth());
         table.row();
-        table.add(battleButton).pad(10).width(Constants.BUTTON_WIDTH);
+        table.add(battleButton).pad(10).width(Constants.getButtonWidth());
         table.row();
-        table.add(backButton).pad(10).width(Constants.BUTTON_WIDTH);
+        table.add(backButton).pad(10).width(Constants.getButtonWidth());
 
         stage.addActor(table);
     }
@@ -131,7 +131,7 @@ public class HomeScreen implements Screen {
         // Draw background
         game.getBatch().setProjectionMatrix(camera.combined);
         game.getBatch().begin();
-        game.getBatch().draw(backgroundTexture, 0, 0, Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT);
+        game.getBatch().draw(backgroundTexture, 0, 0, Constants.getScreenWidth(), Constants.getScreenHeight());
         game.getBatch().end();
 
         // Draw UI
@@ -141,7 +141,17 @@ public class HomeScreen implements Screen {
 
     @Override
     public void resize(int width, int height) {
+        // Update camera and viewport
+        camera.setToOrtho(false, width, height);
         stage.getViewport().update(width, height, true);
+
+        // Recreate UI to adjust to new screen size
+        stage.clear();
+        createUI();
+
+        // Re-add the home fragment
+        stage.addActor(homeFragment.getTable());
+        homeFragment.updateLutemonList();
     }
 
     @Override

@@ -27,7 +27,7 @@ public class BattleScreen implements Screen {
     public BattleScreen(LutemonGame game) {
         this.game = game;
         this.camera = new OrthographicCamera();
-        this.camera.setToOrtho(false, Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT);
+        this.camera.setToOrtho(false, Constants.getScreenWidth(), Constants.getScreenHeight());
         initialize();
 
         // Create battle fragment
@@ -36,12 +36,12 @@ public class BattleScreen implements Screen {
     }
 
     private void initialize() {
-        stage = new Stage(new FitViewport(Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT, camera));
+        stage = new Stage(new FitViewport(Constants.getScreenWidth(), Constants.getScreenHeight(), camera));
         Gdx.input.setInputProcessor(stage);
-        
+
         // Load background
         backgroundTexture = game.getAssetLoader().getBackground("battle");
-        
+
         createUI();
     }
 
@@ -50,8 +50,8 @@ public class BattleScreen implements Screen {
         table.setFillParent(true);
 
         // Title
-        Label titleLabel = new Label("Battle", game.getAssetLoader().getSkin());
-        table.add(titleLabel).pad(20);
+        Label titleLabel = new Label("Battle", game.getAssetLoader().getSkin(), "title");
+        table.add(titleLabel).pad(Constants.getPadding() * 2);
         table.row();
 
         // Buttons
@@ -62,7 +62,7 @@ public class BattleScreen implements Screen {
             return true;
         });
 
-        table.add(backButton).pad(10).width(Constants.BUTTON_WIDTH);
+        table.add(backButton).pad(10).width(Constants.getButtonWidth());
 
         stage.addActor(table);
     }
@@ -109,7 +109,7 @@ public class BattleScreen implements Screen {
         // Draw background
         game.getBatch().setProjectionMatrix(camera.combined);
         game.getBatch().begin();
-        game.getBatch().draw(backgroundTexture, 0, 0, Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT);
+        game.getBatch().draw(backgroundTexture, 0, 0, Constants.getScreenWidth(), Constants.getScreenHeight());
         game.getBatch().end();
 
         // Draw UI
@@ -119,7 +119,21 @@ public class BattleScreen implements Screen {
 
     @Override
     public void resize(int width, int height) {
+        // Update camera and viewport
+        camera.setToOrtho(false, width, height);
         stage.getViewport().update(width, height, true);
+
+        // Recreate UI to adjust to new screen size
+        stage.clear();
+        createUI();
+
+        // Re-add the battle fragment
+        stage.addActor(battleFragment.getTable());
+
+        // Update battle UI if there's an ongoing battle
+        if (currentBattle != null) {
+            updateUI();
+        }
     }
 
     @Override
@@ -145,7 +159,7 @@ public class BattleScreen implements Screen {
     public LutemonGame getGame() {
         return game;
     }
-    
+
     public Battle getCurrentBattle() {
         return currentBattle;
     }

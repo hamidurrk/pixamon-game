@@ -5,6 +5,7 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -16,9 +17,11 @@ public class AssetLoader implements Disposable {
     private final AssetManager manager;
     private Skin skin;
     private Texture defaultTexture; // For fallback when assets are missing
+    private FontManager fontManager;
 
     private AssetLoader() {
         manager = new AssetManager();
+        fontManager = FontManager.getInstance();
         createDefaultTexture();
         loadAssets();
     }
@@ -41,15 +44,24 @@ public class AssetLoader implements Disposable {
 
     private void loadAssets() {
         try {
+            // Initialize fonts first
+            fontManager.initializeFonts();
+
             // Try to load UI skin
             try {
                 manager.load("skins/uiskin.json", Skin.class);
                 manager.finishLoading();
                 skin = manager.get("skins/uiskin.json", Skin.class);
+
+                // Update skin with our custom fonts
+                fontManager.updateSkin(skin);
             } catch (GdxRuntimeException e) {
                 Gdx.app.error("AssetLoader", "Error loading skin: " + e.getMessage());
                 // Create a basic skin
                 skin = new Skin();
+
+                // Add our fonts to the basic skin
+                fontManager.updateSkin(skin);
             }
 
             // Try to load backgrounds
@@ -153,6 +165,9 @@ public class AssetLoader implements Disposable {
         if (defaultTexture != null) {
             defaultTexture.dispose();
         }
+        if (fontManager != null) {
+            fontManager.dispose();
+        }
         manager.dispose();
     }
-} 
+}

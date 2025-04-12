@@ -20,12 +20,12 @@ public class TrainingScreen implements Screen {
     public TrainingScreen(LutemonGame game) {
         this.game = game;
         this.camera = new OrthographicCamera();
-        this.camera.setToOrtho(false, Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT);
+        this.camera.setToOrtho(false, Constants.getScreenWidth(), Constants.getScreenHeight());
         initialize();
     }
 
     private void initialize() {
-        stage = new Stage(new FitViewport(Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT, camera));
+        stage = new Stage(new FitViewport(Constants.getScreenWidth(), Constants.getScreenHeight(), camera));
         Gdx.input.setInputProcessor(stage);
 
         // Load background
@@ -39,8 +39,8 @@ public class TrainingScreen implements Screen {
         table.setFillParent(true);
 
         // Title
-        Label titleLabel = new Label("Training", game.getAssetLoader().getSkin());
-        table.add(titleLabel).pad(20);
+        Label titleLabel = new Label("Training", game.getAssetLoader().getSkin(), "title");
+        table.add(titleLabel).pad(Constants.getPadding() * 2);
         table.row();
 
         // Buttons
@@ -51,7 +51,7 @@ public class TrainingScreen implements Screen {
             return true;
         });
 
-        table.add(backButton).pad(10).width(Constants.BUTTON_WIDTH);
+        table.add(backButton).pad(Constants.getPadding()).width(Constants.getButtonWidth());
 
         stage.addActor(table);
     }
@@ -68,7 +68,7 @@ public class TrainingScreen implements Screen {
         // Draw background
         game.getBatch().setProjectionMatrix(camera.combined);
         game.getBatch().begin();
-        game.getBatch().draw(backgroundTexture, 0, 0, Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT);
+        game.getBatch().draw(backgroundTexture, 0, 0, Constants.getScreenWidth(), Constants.getScreenHeight());
         game.getBatch().end();
 
         // Draw UI
@@ -78,7 +78,13 @@ public class TrainingScreen implements Screen {
 
     @Override
     public void resize(int width, int height) {
+        // Update camera and viewport
+        camera.setToOrtho(false, width, height);
         stage.getViewport().update(width, height, true);
+
+        // Recreate UI to adjust to new screen size
+        stage.clear();
+        createUI();
     }
 
     @Override
