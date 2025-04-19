@@ -1,6 +1,13 @@
 package com.main.lutemon.ui.fragments;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.main.lutemon.model.lutemon.Lutemon;
 import com.main.lutemon.model.storage.Storage;
 import com.main.lutemon.screens.HomeScreen;
@@ -19,45 +26,30 @@ public class HomeFragment {
         this.screen = screen;
         this.skin = skin;
 
-        // Create main table with spacing
         table = new Table();
-        table.setFillParent(true);
-        table.top(); // Align to top
+        table.top();
 
-        // Create scrollable table for Lutemons
+        // Create a placeholder background
+        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pixmap.setColor(0.2f, 0.2f, 0.2f, 0.8f); // Semi-transparent dark gray
+        pixmap.fill();
+        TextureRegionDrawable background = new TextureRegionDrawable(new TextureRegion(new Texture(pixmap)));
+        pixmap.dispose();
+
+        table.setBackground(background);
+
         lutemonTable = new Table();
+
         scrollPane = new ScrollPane(lutemonTable, skin);
         scrollPane.setFadeScrollBars(false);
 
         float padding = Constants.getPadding();
 
-        // Add title with proper spacing
-        Label titleLabel = new Label("Your Lutemons", skin, "title");
-        table.add(titleLabel).pad(padding * 2).expandX().center().row();
+        Label subtitleLabel = new Label("Your Lutemons", skin);
+        table.add(subtitleLabel).pad(padding).row();
 
-        // Add scroll pane with proper spacing
-        table.add(scrollPane).expand().fill().pad(padding).row();
+        table.add(scrollPane).expand().fill().pad(padding);
 
-        // Create button table with proper spacing
-        Table buttonTable = new Table();
-        buttonTable.bottom();
-
-        // Calculate button dimensions
-        float buttonWidth = Constants.getButtonWidth() * 0.8f; // Slightly smaller buttons
-        float buttonHeight = Constants.getScreenHeight() * Constants.BUTTON_HEIGHT_PERCENT * 0.8f;
-
-        TextButton createButton = new TextButton("Create New", skin);
-        TextButton trainButton = new TextButton("Train", skin);
-        TextButton battleButton = new TextButton("Battle", skin);
-
-        // Add buttons horizontally with proper spacing
-        buttonTable.add(createButton).size(buttonWidth, buttonHeight).pad(padding);
-        buttonTable.add(trainButton).size(buttonWidth, buttonHeight).pad(padding);
-        buttonTable.add(battleButton).size(buttonWidth, buttonHeight).pad(padding);
-
-        table.add(buttonTable).expandX().center().pad(padding);
-
-        // Initial update
         updateLutemonList();
     }
 
@@ -67,15 +59,18 @@ public class HomeFragment {
 
         float padding = Constants.getPadding();
 
+        if (lutemons.isEmpty()) {
+            Label emptyLabel = new Label("No Lutemons available", skin);
+            lutemonTable.add(emptyLabel).pad(padding).center();
+            return;
+        }
+
         for (Lutemon lutemon : lutemons) {
             Table lutemonRow = new Table();
-            lutemonRow.setBackground(skin.getDrawable("button"));
             lutemonRow.pad(padding);
 
-            // Create a container for lutemon info
+            // Lutemon info
             Table infoTable = new Table();
-
-            // Lutemon name and stats with proper spacing
             Label nameLabel = new Label(lutemon.getName(), skin);
             Label levelLabel = new Label("Level: " + lutemon.getLevel(), skin);
             Label healthLabel = new Label("HP: " + lutemon.getStats().getCurrentHealth() + "/" +
@@ -89,13 +84,31 @@ public class HomeFragment {
 
             lutemonRow.add(infoTable).expandX().left();
 
-            // Action buttons with proper spacing
+            // Action buttons
             Table actionTable = new Table();
             TextButton trainButton = new TextButton("Train", skin);
             TextButton battleButton = new TextButton("Battle", skin);
 
-            actionTable.add(trainButton).pad(padding).width(80);
-            actionTable.add(battleButton).pad(padding).width(80);
+            float buttonWidth = 80f;
+
+            trainButton.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    Storage.getInstance().moveToLocation(lutemon.getId(), Storage.Location.TRAINING);
+                    updateLutemonList();
+                }
+            });
+
+            battleButton.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    Storage.getInstance().moveToLocation(lutemon.getId(), Storage.Location.BATTLE);
+                    updateLutemonList();
+                }
+            });
+
+            actionTable.add(trainButton).pad(padding).width(buttonWidth);
+            actionTable.add(battleButton).pad(padding).width(buttonWidth);
 
             lutemonRow.add(actionTable).right();
 

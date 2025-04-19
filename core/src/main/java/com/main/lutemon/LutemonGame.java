@@ -29,20 +29,15 @@ public class LutemonGame extends Game {
             initializeScreens();
 
             // Set initial screen
-            setScreen(mainMenuScreen);
+            if (mainMenuScreen != null) {
+                setScreen(mainMenuScreen);
+            } else {
+                Gdx.app.error("LutemonGame", "MainMenuScreen is null after initialization");
+            }
         } catch (Exception e) {
             Gdx.app.error("LutemonGame", "Error creating game: " + e.getMessage());
             if (e.getCause() != null) {
                 Gdx.app.error("LutemonGame", "Caused by: " + e.getCause().getMessage());
-            }
-            // Try to recover by at least showing the main menu
-            if (mainMenuScreen == null && batch != null && assetLoader != null) {
-                try {
-                    mainMenuScreen = new MainMenuScreen(this);
-                    setScreen(mainMenuScreen);
-                } catch (Exception ex) {
-                    Gdx.app.error("LutemonGame", "Fatal error creating main menu: " + ex.getMessage());
-                }
             }
         }
     }
@@ -50,30 +45,12 @@ public class LutemonGame extends Game {
     private void initializeScreens() {
         try {
             mainMenuScreen = new MainMenuScreen(this);
-        } catch (Exception e) {
-            Gdx.app.error("LutemonGame", "Error creating MainMenuScreen: " + e.getMessage());
-            mainMenuScreen = null;
-        }
-
-        try {
             homeScreen = new HomeScreen(this);
-        } catch (Exception e) {
-            Gdx.app.error("LutemonGame", "Error creating HomeScreen: " + e.getMessage());
-            homeScreen = null;
-        }
-
-        try {
             trainingScreen = new TrainingScreen(this);
-        } catch (Exception e) {
-            Gdx.app.error("LutemonGame", "Error creating TrainingScreen: " + e.getMessage());
-            trainingScreen = null;
-        }
-
-        try {
             battleScreen = new BattleScreen(this);
         } catch (Exception e) {
-            Gdx.app.error("LutemonGame", "Error creating BattleScreen: " + e.getMessage());
-            battleScreen = null;
+            Gdx.app.error("LutemonGame", "Error initializing screens: " + e.getMessage());
+            throw e; // Rethrow to be caught by create()
         }
     }
 
@@ -110,11 +87,15 @@ public class LutemonGame extends Game {
     }
 
     public void navigateToHome() {
-        if (homeScreen != null) {
-            setScreen(homeScreen);
-        } else {
-            Gdx.app.error("LutemonGame", "Cannot navigate to home: screen is null");
+        if (homeScreen == null) {
+            try {
+                homeScreen = new HomeScreen(this);
+            } catch (Exception e) {
+                Gdx.app.error("LutemonGame", "Error creating new HomeScreen: " + e.getMessage());
+                return;
+            }
         }
+        setScreen(homeScreen);
     }
 
     public void navigateToTraining() {
@@ -183,4 +164,4 @@ public class LutemonGame extends Game {
             return false;
         }
     }
-} 
+}
