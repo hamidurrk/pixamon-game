@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFont
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.graphics.Texture;
 
 /**
  * Manages font generation and loading for the game
@@ -38,52 +39,44 @@ public class FontManager {
         if (fontsLoaded) return;
 
         try {
-            // Use the default font as a fallback
-            titleFont = new BitmapFont();
-            buttonFont = new BitmapFont();
-            labelFont = new BitmapFont();
-
-            // Try to load the Press Start 2P font if available
             FileHandle fontFile = Gdx.files.internal(Constants.PRESS_START_2P_FONT);
             if (fontFile.exists()) {
                 FreeTypeFontGenerator generator = new FreeTypeFontGenerator(fontFile);
+                FreeTypeFontParameter parameter = new FreeTypeFontParameter();
 
                 // Generate title font
-                FreeTypeFontParameter titleParams = new FreeTypeFontParameter();
-                titleParams.size = Constants.getTitleFontSize();
-                titleParams.color = Color.WHITE;
-                titleFont = generator.generateFont(titleParams);
+                parameter.size = Constants.getTitleFontSize();
+                parameter.color = Color.WHITE;
+                parameter.minFilter = Texture.TextureFilter.Linear;
+                parameter.magFilter = Texture.TextureFilter.Linear;
+                titleFont = generator.generateFont(parameter);
 
                 // Generate button font
-                FreeTypeFontParameter buttonParams = new FreeTypeFontParameter();
-                buttonParams.size = Constants.getButtonFontSize();
-                buttonParams.color = Color.WHITE;
-                buttonFont = generator.generateFont(buttonParams);
+                parameter.size = Constants.getButtonFontSize();
+                buttonFont = generator.generateFont(parameter);
 
                 // Generate label font
-                FreeTypeFontParameter labelParams = new FreeTypeFontParameter();
-                labelParams.size = Constants.getLabelFontSize();
-                labelParams.color = Color.WHITE;
-                labelFont = generator.generateFont(labelParams);
+                parameter.size = Constants.getLabelFontSize();
+                labelFont = generator.generateFont(parameter);
 
                 generator.dispose();
             } else {
-                Gdx.app.log("FontManager", "Press Start 2P font not found, using default font");
-
-                // Scale the default font to be larger
+                Gdx.app.error("FontManager", "Font file not found: " + Constants.PRESS_START_2P_FONT);
+                // Fallback to default bitmap font with scaling
+                titleFont = new BitmapFont();
                 titleFont.getData().setScale(2.0f);
+                buttonFont = new BitmapFont();
                 buttonFont.getData().setScale(1.5f);
-                labelFont.getData().setScale(1.2f);
+                labelFont = new BitmapFont();
+                labelFont.getData().setScale(1.0f);
             }
 
             fontsLoaded = true;
         } catch (Exception e) {
-            Gdx.app.error("FontManager", "Error loading fonts: " + e.getMessage());
-
-            // Ensure we have some fonts even if loading fails
-            if (titleFont == null) titleFont = new BitmapFont();
-            if (buttonFont == null) buttonFont = new BitmapFont();
-            if (labelFont == null) labelFont = new BitmapFont();
+            Gdx.app.error("FontManager", "Error loading fonts", e);
+            titleFont = new BitmapFont();
+            buttonFont = new BitmapFont();
+            labelFont = new BitmapFont();
         }
     }
 
@@ -99,6 +92,7 @@ public class FontManager {
         try {
             // Update label styles
             LabelStyle titleStyle = new LabelStyle(titleFont, Color.WHITE);
+            Gdx.app.log("FontManager", "Creating title style with font size: " + titleFont.getData().scaleX);
             skin.add("title", titleStyle, LabelStyle.class);
 
             LabelStyle defaultLabelStyle = skin.get("default", LabelStyle.class);
@@ -109,7 +103,7 @@ public class FontManager {
             defaultButtonStyle.font = buttonFont;
 
         } catch (Exception e) {
-            Gdx.app.error("FontManager", "Error updating skin: " + e.getMessage());
+            Gdx.app.error("FontManager", "Error updating skin", e);
         }
     }
 

@@ -19,52 +19,43 @@ public class HomeFragment {
         this.screen = screen;
         this.skin = skin;
 
-        // Create main table
+        // Create main table with spacing
         table = new Table();
         table.setFillParent(true);
+        table.top(); // Align to top
 
         // Create scrollable table for Lutemons
         lutemonTable = new Table();
         scrollPane = new ScrollPane(lutemonTable, skin);
         scrollPane.setFadeScrollBars(false);
 
-        // Add title
-        Label titleLabel = new Label("Your Lutemons", skin);
-        table.add(titleLabel).pad(20);
-        table.row();
+        float padding = Constants.getPadding();
 
-        // Add scroll pane
-        table.add(scrollPane).expand().fill();
-        table.row();
+        // Add title with proper spacing
+        Label titleLabel = new Label("Your Lutemons", skin, "title");
+        table.add(titleLabel).pad(padding * 2).expandX().center().row();
 
-        // Add buttons
+        // Add scroll pane with proper spacing
+        table.add(scrollPane).expand().fill().pad(padding).row();
+
+        // Create button table with proper spacing
         Table buttonTable = new Table();
-        buttonTable.bottom().pad(20);
+        buttonTable.bottom();
 
-        TextButton createButton = new TextButton("Create New Lutemon", skin);
-        TextButton trainButton = new TextButton("Go to Training", skin);
-        TextButton battleButton = new TextButton("Go to Battle", skin);
+        // Calculate button dimensions
+        float buttonWidth = Constants.getButtonWidth() * 0.8f; // Slightly smaller buttons
+        float buttonHeight = Constants.getScreenHeight() * Constants.BUTTON_HEIGHT_PERCENT * 0.8f;
 
-        createButton.addListener(event -> {
-            screen.showCreateLutemonDialog();
-            return true;
-        });
+        TextButton createButton = new TextButton("Create New", skin);
+        TextButton trainButton = new TextButton("Train", skin);
+        TextButton battleButton = new TextButton("Battle", skin);
 
-        trainButton.addListener(event -> {
-            screen.getGame().navigateToTraining();
-            return true;
-        });
+        // Add buttons horizontally with proper spacing
+        buttonTable.add(createButton).size(buttonWidth, buttonHeight).pad(padding);
+        buttonTable.add(trainButton).size(buttonWidth, buttonHeight).pad(padding);
+        buttonTable.add(battleButton).size(buttonWidth, buttonHeight).pad(padding);
 
-        battleButton.addListener(event -> {
-            screen.getGame().navigateToBattle();
-            return true;
-        });
-
-        buttonTable.add(createButton).pad(10).width(150);
-        buttonTable.add(trainButton).pad(10).width(150);
-        buttonTable.add(battleButton).pad(10).width(150);
-
-        table.add(buttonTable);
+        table.add(buttonTable).expandX().center().pad(padding);
 
         // Initial update
         updateLutemonList();
@@ -74,48 +65,45 @@ public class HomeFragment {
         lutemonTable.clear();
         List<Lutemon> lutemons = Storage.getInstance().getLutemonsAtLocation(Storage.Location.HOME);
 
+        float padding = Constants.getPadding();
+
         for (Lutemon lutemon : lutemons) {
             Table lutemonRow = new Table();
             lutemonRow.setBackground(skin.getDrawable("button"));
+            lutemonRow.pad(padding);
 
-            // Lutemon name and type
+            // Create a container for lutemon info
+            Table infoTable = new Table();
+
+            // Lutemon name and stats with proper spacing
             Label nameLabel = new Label(lutemon.getName(), skin);
             Label levelLabel = new Label("Level: " + lutemon.getLevel(), skin);
-            Label healthLabel = new Label("HP: " + lutemon.getStats().getCurrentHealth() + "/" + 
+            Label healthLabel = new Label("HP: " + lutemon.getStats().getCurrentHealth() + "/" +
                                         lutemon.getStats().getMaxHealth(), skin);
-            lutemonRow.add(nameLabel).pad(5);
-            lutemonRow.add(levelLabel).pad(5);
-            lutemonRow.add(healthLabel).pad(5);
-
-            // Stats
             Label expLabel = new Label("EXP: " + lutemon.getStats().getExperience(), skin);
-            lutemonRow.add(expLabel).pad(5);
 
-            // Action buttons
+            infoTable.add(nameLabel).pad(padding).left();
+            infoTable.add(levelLabel).pad(padding);
+            infoTable.add(healthLabel).pad(padding);
+            infoTable.add(expLabel).pad(padding);
+
+            lutemonRow.add(infoTable).expandX().left();
+
+            // Action buttons with proper spacing
+            Table actionTable = new Table();
             TextButton trainButton = new TextButton("Train", skin);
             TextButton battleButton = new TextButton("Battle", skin);
 
-            trainButton.addListener(event -> {
-                Storage.getInstance().moveToLocation(lutemon.getId(), Storage.Location.TRAINING);
-                updateLutemonList();
-                return true;
-            });
+            actionTable.add(trainButton).pad(padding).width(80);
+            actionTable.add(battleButton).pad(padding).width(80);
 
-            battleButton.addListener(event -> {
-                Storage.getInstance().moveToLocation(lutemon.getId(), Storage.Location.BATTLE);
-                updateLutemonList();
-                return true;
-            });
+            lutemonRow.add(actionTable).right();
 
-            lutemonRow.add(trainButton).pad(5).width(80);
-            lutemonRow.add(battleButton).pad(5).width(80);
-
-            lutemonTable.add(lutemonRow).fillX().pad(5);
-            lutemonTable.row();
+            lutemonTable.add(lutemonRow).expandX().fillX().pad(padding / 2).row();
         }
     }
 
     public Table getTable() {
         return table;
     }
-} 
+}

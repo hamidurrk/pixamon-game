@@ -5,8 +5,10 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.main.lutemon.LutemonGame;
 import com.main.lutemon.utils.Constants;
@@ -40,42 +42,28 @@ public class MainMenuScreen implements Screen {
 
         // Title
         Label titleLabel = new Label("Lutemon Game", game.getAssetLoader().getSkin(), "title");
-        table.add(titleLabel).pad(Constants.getPadding() * 5);
-        table.row();
+        table.add(titleLabel).pad(Constants.getPadding() * 5).row();
+
+        // Button dimensions
+        float buttonWidth = Constants.getButtonWidth();
+        float buttonHeight = Constants.getScreenHeight() * Constants.BUTTON_HEIGHT_PERCENT;
+        float padding = Constants.getPadding();
 
         // Buttons
         TextButton newGameButton = new TextButton("New Game", game.getAssetLoader().getSkin());
         TextButton loadGameButton = new TextButton("Load Game", game.getAssetLoader().getSkin());
         TextButton exitButton = new TextButton("Exit", game.getAssetLoader().getSkin());
 
-        newGameButton.addListener(event -> {
-            game.navigateToHome();
-            return true;
-        });
-
-        loadGameButton.addListener(event -> {
-            if (game.hasSaveFile()) {
-                if (game.loadGame()) {
-                    game.navigateToHome();
-                } else {
-                    showErrorDialog("Failed to load game");
-                }
-            } else {
-                showErrorDialog("No save file found");
+        newGameButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                game.navigateToHome();
             }
-            return true;
         });
 
-        exitButton.addListener(event -> {
-            Gdx.app.exit();
-            return true;
-        });
-
-        table.add(newGameButton).pad(Constants.getPadding()).width(Constants.getButtonWidth());
-        table.row();
-        table.add(loadGameButton).pad(Constants.getPadding()).width(Constants.getButtonWidth());
-        table.row();
-        table.add(exitButton).pad(Constants.getPadding()).width(Constants.getButtonWidth());
+        table.add(newGameButton).size(buttonWidth, buttonHeight).pad(padding).row();
+        table.add(loadGameButton).size(buttonWidth, buttonHeight).pad(padding).row();
+        table.add(exitButton).size(buttonWidth, buttonHeight).pad(padding).row();
 
         stage.addActor(table);
     }

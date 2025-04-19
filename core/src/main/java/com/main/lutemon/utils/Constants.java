@@ -9,12 +9,12 @@ public class Constants {
 
     // UI constants - will be scaled based on screen size
     private static final float BUTTON_WIDTH_PERCENT = 0.4f; // 40% of screen width
-    private static final float BUTTON_HEIGHT_PERCENT = 0.2f; // 20% of screen height
-    private static final float PADDING_PERCENT = 0.02f; // 2% of screen width
-    private static final float MARGIN_PERCENT = 0.04f; // 4% of screen width
+    public static final float BUTTON_HEIGHT_PERCENT = 0.1f; // 12% of screen height
+    private static final float PADDING_PERCENT = 0.01f; // 2% of screen width
+    private static final float MARGIN_PERCENT = 0.03f; // 4% of screen width
 
-    // Font sizes
-    private static final float TITLE_FONT_SIZE = 0.05f; // 5% of screen height
+    // Font sizes - in actual pixels
+    private static final float TITLE_FONT_SIZE = 0.06f; // 6% of screen height
     private static final float BUTTON_FONT_SIZE = 0.04f; // 4% of screen height
     private static final float LABEL_FONT_SIZE = 0.035f; // 3.5% of screen height
 
@@ -117,5 +117,5 @@ public class Constants {
     }
 
     // Font paths
-    public static final String PRESS_START_2P_FONT = "fonts/press-start-2p.ttf";
+    public static final String PRESS_START_2P_FONT = "fonts/PressStart2P-Regular.ttf";
 }

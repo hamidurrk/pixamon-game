@@ -20,73 +20,80 @@ public class HomeScreen implements Screen {
     private Stage stage;
     private final OrthographicCamera camera;
     private TextureRegion backgroundTexture;
-    private final HomeFragment homeFragment;
+    private HomeFragment homeFragment;  // Remove final modifier
 
     public HomeScreen(LutemonGame game) {
         this.game = game;
         this.camera = new OrthographicCamera();
         this.camera.setToOrtho(false, Constants.getScreenWidth(), Constants.getScreenHeight());
         initialize();
-
-        // Create home fragment
-        homeFragment = new HomeFragment(this, game.getAssetLoader().getSkin());
-        stage.addActor(homeFragment.getTable());
     }
 
     private void initialize() {
-        stage = new Stage(new FitViewport(Constants.getScreenWidth(), Constants.getScreenHeight(), camera));
-        Gdx.input.setInputProcessor(stage);
+        try {
+            // Initialize stage first
+            stage = new Stage(new FitViewport(Constants.getScreenWidth(), Constants.getScreenHeight(), camera));
+            Gdx.input.setInputProcessor(stage);
 
-        // Load background
-        backgroundTexture = game.getAssetLoader().getBackground("home");
+            // Load background
+            backgroundTexture = game.getAssetLoader().getBackground("home");
 
-        createUI();
+            // Initialize HomeFragment before creating UI
+            homeFragment = new HomeFragment(this, game.getAssetLoader().getSkin());
+
+            // Create UI after HomeFragment is initialized
+            createUI();
+
+            // Add HomeFragment to stage last
+            stage.addActor(homeFragment.getTable());
+        } catch (Exception e) {
+            Gdx.app.error("HomeScreen", "Error initializing: " + e.getMessage());
+            throw e; // Rethrow to maintain error handling chain
+        }
     }
 
     private void createUI() {
-        Table table = new Table();
-        table.setFillParent(true);
+        // Main container table
+        Table mainTable = new Table();
+        mainTable.setFillParent(true);
 
-        // Title
+        // Create a container for the title and main buttons
+        Table contentTable = new Table();
+        contentTable.top();  // Align to top
+
+        // Title with proper spacing
         Label titleLabel = new Label("Home", game.getAssetLoader().getSkin(), "title");
-        table.add(titleLabel).pad(Constants.getPadding() * 2);
-        table.row();
+        contentTable.add(titleLabel).pad(Constants.getPadding() * 3).expandX().center().row();
 
-        // Buttons
+        // Calculate button dimensions
+        float buttonWidth = Constants.getButtonWidth();
+        float buttonHeight = Constants.getScreenHeight() * Constants.BUTTON_HEIGHT_PERCENT;
+        float padding = Constants.getPadding() * 2;
+
+        // Create buttons with proper spacing
         TextButton createButton = new TextButton("Create New Lutemon", game.getAssetLoader().getSkin());
         TextButton trainButton = new TextButton("Go to Training", game.getAssetLoader().getSkin());
         TextButton battleButton = new TextButton("Go to Battle", game.getAssetLoader().getSkin());
         TextButton backButton = new TextButton("Back to Menu", game.getAssetLoader().getSkin());
 
-        createButton.addListener(event -> {
-            showCreateLutemonDialog();
-            return true;
-        });
+        // Add buttons vertically with proper spacing
+        contentTable.add(createButton).size(buttonWidth, buttonHeight).pad(padding).row();
+        contentTable.add(trainButton).size(buttonWidth, buttonHeight).pad(padding).row();
+        contentTable.add(battleButton).size(buttonWidth, buttonHeight).pad(padding).row();
+        contentTable.add(backButton).size(buttonWidth, buttonHeight).pad(padding).row();
 
-        trainButton.addListener(event -> {
-            game.navigateToTraining();
-            return true;
-        });
+        // Add content table to main table
+        mainTable.add(contentTable).expand().fill().row();
 
-        battleButton.addListener(event -> {
-            game.navigateToBattle();
-            return true;
-        });
+        // Add the home fragment below the buttons with proper spacing
+        if (homeFragment != null && homeFragment.getTable() != null) {
+            Table fragmentContainer = new Table();
+            fragmentContainer.add(homeFragment.getTable()).expand().fill().pad(padding);
+            mainTable.add(fragmentContainer).expand().fill();
+        }
 
-        backButton.addListener(event -> {
-            game.setScreen(new MainMenuScreen(game));
-            return true;
-        });
-
-        table.add(createButton).pad(10).width(Constants.getButtonWidth());
-        table.row();
-        table.add(trainButton).pad(10).width(Constants.getButtonWidth());
-        table.row();
-        table.add(battleButton).pad(10).width(Constants.getButtonWidth());
-        table.row();
-        table.add(backButton).pad(10).width(Constants.getButtonWidth());
-
-        stage.addActor(table);
+        // Add the main table to the stage
+        stage.addActor(mainTable);
     }
 
     public void showCreateLutemonDialog() {
