@@ -16,9 +16,8 @@ import com.main.lutemon.utils.Constants;
 
 import java.util.List;
 
-public class HomeFragment {
+public class HomeFragment extends Table {
     private final HomeScreen screen;
-    private final Table table;
     private final ScrollPane scrollPane;
     private final Table lutemonTable;
     private final Skin skin;
@@ -31,54 +30,54 @@ public class HomeFragment {
         this.width = width;
         this.height = height;
 
-        // Debug initialization
-        Gdx.app.log("HomeFragment", "Initializing HomeFragment");
-
-        table = new Table();
-        table.setSize(width, height);  // Set exact size
+        // Set size for this table (now 'this' is the table)
+        setSize(width, height);
 
         lutemonTable = new Table();
-        lutemonTable.top();
+        lutemonTable.top().left();
+        lutemonTable.defaults().expandX().fillX();
 
         scrollPane = new ScrollPane(lutemonTable, skin);
         scrollPane.setFadeScrollBars(false);
         scrollPane.setForceScroll(false, true);
+        scrollPane.setScrollingDisabled(true, false);
 
-        // Add scrollPane to main table with exact sizing
-        table.add(scrollPane)
+        // Add scrollPane to this table
+        add(scrollPane)
             .width(width)
             .height(height)
-            .expand();
+            .expand().fill().top();
 
-        // Create default Lutemons automatically
         createDefaultLutemons();
-
-        // Debug final setup
-        Gdx.app.log("HomeFragment", String.format("HomeFragment initialized with dimensions: %.2f x %.2f", width, height));
     }
 
     public void updateLutemonList() {
         lutemonTable.clear();
-        lutemonTable.setSize(width, height);  // Set exact size
+        lutemonTable.top().left();  // Ensure alignment to top-left
 
         List<Lutemon> lutemons = Storage.getInstance().getLutemonsAtLocation(Storage.Location.HOME);
 
         float padding = Constants.getPadding();
-        float rowHeight = height * 0.17f;  // Adjust row height based on container height
+        float rowHeight = height * 0.45f;
 
-        // Headers
-        Table headerRow = new Table();
-        headerRow.add(new Label("Name", skin)).expandX().left().pad(padding);
-        headerRow.add(new Label("Stats", skin)).expandX().left().pad(padding);
-        lutemonTable.add(headerRow).expandX().fillX().pad(5).row();
+        // Add headers
+//        Table headerRow = new Table();
+//        headerRow.add(new Label("Name", skin, "default")).width(width * 0.4f).left().pad(padding);
+//        headerRow.add(new Label("Stats", skin, "default")).width(width * 0.6f).left().pad(padding);
+//        lutemonTable.add(headerRow).expandX().fillX().pad(5).row();
+
+        // Add separator
+//        Table separator = new Table();
+//        separator.setBackground(createColoredBackground(new Color(1, 1, 1, 0.3f)));
+//        lutemonTable.add(separator).height(2).expandX().fillX().pad(2).row();
 
         // Debug the table structure
         Gdx.app.log("HomeFragment", "Added headers to lutemonTable");
 
-        // Add separator
-        Table separator = new Table();
-        separator.setBackground(createColoredBackground(new Color(1, 1, 1, 0.3f)));
-        lutemonTable.add(separator).height(2).expandX().fillX().pad(2).row();
+        // Set fixed column widths for consistent alignment
+        float avatarColumnWidth = width * 0.2f;
+        float nameColumnWidth = width * 0.4f;
+        float statsColumnWidth = width * 0.4f;
 
         for (Lutemon lutemon : lutemons) {
             // Debug each Lutemon
@@ -87,28 +86,50 @@ public class HomeFragment {
             Table lutemonRow = new Table();
             lutemonRow.setBackground(createLutemonBackground(lutemon));
 
+            // Avatar column
+            Table avatarContainer = new Table();
+
+            // Create placeholder image with darker gray
+            Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+            pixmap.setColor(0.3f, 0.3f, 0.3f, 1);
+            pixmap.fill();
+            TextureRegionDrawable placeholder = new TextureRegionDrawable(new TextureRegion(new Texture(pixmap)));
+            pixmap.dispose();
+
+            Image avatarImage = new Image(placeholder);
+            avatarContainer.add(avatarImage).size(height * 0.18f).pad(padding);  // Square image, 20% of height
+
+            lutemonRow.add(avatarContainer).width(avatarColumnWidth).left().pad(padding);
+
             // Name column
             Label nameLabel = new Label(lutemon.getName(), skin);
-            lutemonRow.add(nameLabel).expandX().left().pad(padding);
+            lutemonRow.add(nameLabel).width(nameColumnWidth).left().pad(padding);
 
             // Stats column
             Table statsTable = new Table();
-            statsTable.add(new Label("HP: " + lutemon.getStats().getCurrentHealth() + "/" +
-                         lutemon.getStats().getMaxHealth(), skin)).left().row();
-            statsTable.add(new Label("ATK: " + lutemon.getStats().getAttack() +
-                         " DEF: " + lutemon.getStats().getDefense(), skin)).left().row();
-            statsTable.add(new Label("EXP: " + lutemon.getStats().getExperience(), skin)).left();
-            lutemonRow.add(statsTable).expandX().left().pad(padding);
+            // Add a container table to ensure consistent alignment
+            statsTable.defaults().left().padBottom(5);
 
-            lutemonTable.add(lutemonRow).expandX().fillX().height(rowHeight).pad(2).row();
+            statsTable.add(new Label("HP: " + lutemon.getStats().getCurrentHealth() + "/" +
+                         lutemon.getStats().getMaxHealth(), skin)).row();
+            statsTable.add(new Label("ATK: " + lutemon.getStats().getAttack() +
+                         " DEF: " + lutemon.getStats().getDefense(), skin)).row();
+            statsTable.add(new Label("EXP: " + lutemon.getStats().getExperience(), skin));
+
+            lutemonRow.add(statsTable).width(statsColumnWidth).left().pad(padding);
+
+            lutemonTable.add(lutemonRow).expandX().fillX().height(rowHeight).pad(5).row();
         }
 
-        // Ensure the tables are properly sized
-        lutemonTable.setFillParent(true);
-        table.setFillParent(true);
+        // Ensure the tables are properly sized but don't set fillParent which can cause alignment issues
+        lutemonTable.setSize(width, height);
+
+        // Force the scroll to the top
+        scrollPane.setScrollY(0);
+        scrollPane.updateVisualScroll();
 
         // Debug final table structure
-        Gdx.app.log("HomeFragment", "Table structure: " + table.toString());
+//        Gdx.app.log("HomeFragment", "Table structure: " + table.toString());
     }
 
     private void createDefaultLutemons() {
@@ -137,22 +158,22 @@ public class HomeFragment {
         Color color;
         switch (lutemon.getType()) {
             case WHITE:
-                color = new Color(1, 1, 1, 0.2f);
+                color = new Color(1, 1, 1, 0.3f);
                 break;
             case GREEN:
-                color = new Color(0, 1, 0, 0.2f);
+                color = new Color(0, 1, 0, 0.3f);
                 break;
             case PINK:
-                color = new Color(1, 0.7f, 0.7f, 0.2f);
+                color = new Color(1, 0.7f, 0.7f, 0.3f);
                 break;
             case ORANGE:
-                color = new Color(1, 0.5f, 0, 0.2f);
+                color = new Color(1, 0.5f, 0, 0.3f);
                 break;
             case BLACK:
-                color = new Color(0.3f, 0.3f, 0.3f, 0.2f);
+                color = new Color(0.3f, 0.3f, 0.3f, 0.3f);
                 break;
             default:
-                color = new Color(0.5f, 0.5f, 0.5f, 0.2f);
+                color = new Color(0.5f, 0.5f, 0.5f, 0.3f);
         }
         return createColoredBackground(color);
     }
@@ -166,7 +187,5 @@ public class HomeFragment {
         return background;
     }
 
-    public Table getTable() {
-        return table;
-    }
+    // getTable() method removed
 }

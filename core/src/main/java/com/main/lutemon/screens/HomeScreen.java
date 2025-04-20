@@ -68,26 +68,7 @@ public class HomeScreen implements Screen {
             }
         });
         topTable.add(backButton).size(buttonWidth * 0.25f, buttonHeight).pad(padding);
-        stage.addActor(topTable);
 
-        // Title
-        Label titleLabel = new Label("Your Lutemons", game.getAssetLoader().getSkin(), "title");
-        mainTable.add(titleLabel).pad(padding * 2).expandX().center().row();
-
-        // Calculate container dimensions
-        float containerWidth = Constants.getScreenWidth() * 0.9f;
-        float containerHeight = Constants.getScreenHeight() * 0.6f;
-
-        // HomeFragment container with placeholder background
-        Table fragmentContainer = new Table();
-
-
-        // Create HomeFragment with specific dimensions
-        homeFragment = new HomeFragment(this, game.getAssetLoader().getSkin(), containerWidth, containerHeight);
-
-        // Create New Lutemon button - positioned at the bottom of the fragment
-        Table createButtonContainer = new Table();
-        createButtonContainer.setFillParent(true);
         TextButton createButton = new TextButton("Create", game.getAssetLoader().getSkin());
         createButton.addListener(new ClickListener() {
             @Override
@@ -95,20 +76,27 @@ public class HomeScreen implements Screen {
                 showCreateLutemonDialog();
             }
         });
+        topTable.add(createButton).size(buttonWidth * 0.35f, buttonHeight).pad(padding).expandX().right();
 
-        // Position the create button to overlap with the bottom of the fragment
-        float createButtonY = Constants.getScreenHeight() * 0.25f; // Adjust this value to position the button
-        float createButtonX = Constants.getScreenWidth() * 0.37f; // Adjust this value to position the button
-        createButtonContainer.add(createButton)
-            .size(buttonWidth * 0.4f, buttonHeight * 0.8f)
-            .padBottom(padding)
-            .expand()
-            .bottom();
-        createButtonContainer.setY(createButtonY);
-        createButtonContainer.setX(createButtonX);
 
-        // Add fragment container to main table
-        mainTable.add(fragmentContainer).expand().fill().pad(padding).row();
+        // Title
+        Label titleLabel = new Label("Your Lutemons", game.getAssetLoader().getSkin(), "title");
+        mainTable.add(titleLabel).pad(padding * 2).expandX().center().row();
+
+        Table fragmentContainer = new Table();
+        fragmentContainer.setFillParent(true);
+//        fragmentContainer.setDebug(true);
+
+        // Create and position HomeFragment directly
+        float fragmentX = Constants.getScreenWidth() * 0.05f;
+        float fragmentY = Constants.getScreenHeight() * 0.2f;
+        float fragmentWidth = Constants.getScreenWidth() * 0.9f;
+        float fragmentHeight = Constants.getScreenHeight() * 0.6f;
+
+        homeFragment = new HomeFragment(this, game.getAssetLoader().getSkin(), fragmentWidth, fragmentHeight);
+        homeFragment.setPosition(fragmentX, fragmentY);
+        fragmentContainer.add(homeFragment).expand().fill();
+        mainTable.add(fragmentContainer).expand().fill().center().pad(padding).row();
 
         // Bottom navigation buttons
         Table bottomTable = new Table();
@@ -138,8 +126,9 @@ public class HomeScreen implements Screen {
         mainTable.add(bottomTable).padBottom(padding * 2).row();
 
         // Add all tables to stage
+        stage.addActor(topTable);
         stage.addActor(mainTable);
-        stage.addActor(createButtonContainer);
+//        stage.addActor(createButtonContainer);
     }
 
     public void showCreateLutemonDialog() {
@@ -201,7 +190,7 @@ public class HomeScreen implements Screen {
         createUI();
 
         // Re-add the home fragment
-        stage.addActor(homeFragment.getTable());
+        stage.addActor(homeFragment);
         homeFragment.updateLutemonList();
     }
 
