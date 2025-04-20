@@ -1,0 +1,27 @@
+{
+  "white": {
+    "idle":  { "file": "white_idle.png",  "cols": 7, "rows": 1, "frameDuration": 0.50 },
+    "walk":  { "file": "white_walk.png",  "cols": 8, "rows": 1, "frameDuration": 0.10 },
+    "attack":{ "file": "white_atk.png",   "cols": 6, "rows": 2, "frameDuration": 0.12 }
+  },
+  "green": {
+    "idle":  { "file": "green_idle.png",  "cols": 8, "rows": 1, "frameDuration": 0.50 },
+    "walk":  { "file": "green_walk.png",  "cols": 8, "rows": 1, "frameDuration": 0.10 },
+    "attack":{ "file": "green_atk.png",   "cols": 6, "rows": 2, "frameDuration": 0.12 }
+  },
+  "pink": {
+    "idle":  { "file": "pink_idle.png",   "cols": 5, "rows": 1, "frameDuration": 0.50 },
+    "walk":  { "file": "pink_walk.png",   "cols": 8, "rows": 1, "frameDuration": 0.10 },
+    "attack":{ "file": "pink_atk.png",    "cols": 6, "rows": 2, "frameDuration": 0.12 }
+  },
+  "orange": {
+    "idle":  { "file": "orange_idle.png", "cols": 8, "rows": 1, "frameDuration": 0.50 },
+    "walk":  { "file": "orange_walk.png", "cols": 8, "rows": 1, "frameDuration": 0.10 },
+    "attack":{ "file": "orange_atk.png",  "cols": 6, "rows": 2, "frameDuration": 0.12 }
+  },
+  "black": {
+    "idle":  { "file": "black_idle.png",  "cols": 9, "rows": 1, "frameDuration": 0.50 },
+    "walk":  { "file": "black_walk.png",  "cols": 8, "rows": 1, "frameDuration": 0.10 },
+    "attack":{ "file": "black_atk.png",   "cols": 6, "rows": 2, "frameDuration": 0.12 }
+  }
+}

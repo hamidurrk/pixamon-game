@@ -12,6 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.main.lutemon.model.lutemon.*;
 import com.main.lutemon.model.storage.Storage;
 import com.main.lutemon.screens.HomeScreen;
+import com.main.lutemon.ui.components.AnimatedAvatar;
 import com.main.lutemon.utils.Constants;
 
 import java.util.List;
@@ -90,16 +91,36 @@ public class HomeFragment extends Table {
             Table avatarContainer = new Table();
 
             // Create placeholder image with darker gray
-            Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
-            pixmap.setColor(0.3f, 0.3f, 0.3f, 1);
-            pixmap.fill();
-            TextureRegionDrawable placeholder = new TextureRegionDrawable(new TextureRegion(new Texture(pixmap)));
-            pixmap.dispose();
+//            Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+//            pixmap.setColor(0.3f, 0.3f, 0.3f, 1);
+//            pixmap.fill();
+//            TextureRegionDrawable placeholder = new TextureRegionDrawable(new TextureRegion(new Texture(pixmap)));
+//            pixmap.dispose();
+//
+//            Image avatarImage = new Image(placeholder);
+//            avatarContainer.add(avatarImage).size(height * 0.18f).pad(padding);  // Square image, 20% of height
+            float avatarSize = height * 0.8f; // 20% of fragment height
+            int avatarPaddingBottom = 180;
 
-            Image avatarImage = new Image(placeholder);
-            avatarContainer.add(avatarImage).size(height * 0.18f).pad(padding);  // Square image, 20% of height
+            if (lutemon.getType() == LutemonType.ORANGE) {
+                avatarSize = height * 0.4f;
+                avatarPaddingBottom = 20;
+            }
+            if (lutemon.getType() == LutemonType.GREEN) {
+                avatarSize = height * 0.6f;
+                avatarPaddingBottom = 0;
+            }
+            if (lutemon.getType() == LutemonType.BLACK) {
+                avatarPaddingBottom = 50;
+            }
+            if (lutemon.getType() == LutemonType.PINK) {
+                avatarSize = height;
+                avatarPaddingBottom = -20;
+            }
+            AnimatedAvatar avatar = new AnimatedAvatar(lutemon.getType().toString(), avatarSize);
+            avatarContainer.add(avatar).size(avatarSize).pad(10, 5, avatarPaddingBottom, 5);
 
-            lutemonRow.add(avatarContainer).width(avatarColumnWidth).left().pad(padding);
+            lutemonRow.add(avatarContainer).width(avatarColumnWidth).top().pad(padding);
 
             // Name column
             Label nameLabel = new Label(lutemon.getName(), skin);
