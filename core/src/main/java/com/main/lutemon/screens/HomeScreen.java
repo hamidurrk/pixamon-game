@@ -74,21 +74,16 @@ public class HomeScreen implements Screen {
         Label titleLabel = new Label("Your Lutemons", game.getAssetLoader().getSkin(), "title");
         mainTable.add(titleLabel).pad(padding * 2).expandX().center().row();
 
+        // Calculate container dimensions
+        float containerWidth = Constants.getScreenWidth() * 0.9f;
+        float containerHeight = Constants.getScreenHeight() * 0.6f;
+
         // HomeFragment container with placeholder background
         Table fragmentContainer = new Table();
-        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
-        pixmap.setColor(0.2f, 0.2f, 0.2f, 0.8f);
-        pixmap.fill();
-        TextureRegionDrawable background = new TextureRegionDrawable(new TextureRegion(new Texture(pixmap)));
-        pixmap.dispose();
-        fragmentContainer.setBackground(background);
 
-        homeFragment = new HomeFragment(this, game.getAssetLoader().getSkin());
-        fragmentContainer.add(homeFragment.getTable())
-            .expand()
-            .fill()
-            .height(Constants.getScreenHeight() * 0.6f)
-            .width(Constants.getScreenWidth() * 0.9f);
+
+        // Create HomeFragment with specific dimensions
+        homeFragment = new HomeFragment(this, game.getAssetLoader().getSkin(), containerWidth, containerHeight);
 
         // Create New Lutemon button - positioned at the bottom of the fragment
         Table createButtonContainer = new Table();

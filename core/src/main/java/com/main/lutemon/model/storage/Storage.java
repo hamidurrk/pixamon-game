@@ -6,7 +6,8 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Storage implements Serializable {
-    public static Storage instance;
+    private static final long serialVersionUID = 1L;
+    private static volatile Storage instance;
     private final Map<Integer, Lutemon> lutemons;
     private final Map<Integer, Location> lutemonLocations;
     private int nextId;
@@ -19,39 +20,56 @@ public class Storage implements Serializable {
 
     public static Storage getInstance() {
         if (instance == null) {
-            instance = new Storage();
+            synchronized (Storage.class) {
+                if (instance == null) {
+                    instance = new Storage();
+                }
+            }
         }
         return instance;
     }
 
-    public void addLutemon(Lutemon lutemon) {
+    public synchronized void addLutemon(Lutemon lutemon) {
+        if (lutemon == null) {
+            throw new IllegalArgumentException("Lutemon cannot be null");
+        }
         lutemon.setId(nextId++);
         lutemons.put(lutemon.getId(), lutemon);
         lutemonLocations.put(lutemon.getId(), Location.HOME);
     }
 
-    public void moveToLocation(int lutemonId, Location location) {
+    public synchronized void moveToLocation(int lutemonId, Location location) {
+        if (!lutemons.containsKey(lutemonId)) {
+            throw new IllegalArgumentException("Invalid Lutemon ID: " + lutemonId);
+        }
+        if (location == null) {
+            throw new IllegalArgumentException("Location cannot be null");
+        }
         lutemonLocations.put(lutemonId, location);
     }
 
     public List<Lutemon> getLutemonsAtLocation(Location location) {
+        if (location == null) {
+            throw new IllegalArgumentException("Location cannot be null");
+        }
+
         List<Lutemon> result = new ArrayList<>();
-        for (Map.Entry<Integer, Location> entry : lutemonLocations.entrySet()) {
-            if (entry.getValue() == location) {
+        lutemonLocations.entrySet().stream()
+            .filter(entry -> entry.getValue() == location)
+            .forEach(entry -> {
                 Lutemon lutemon = lutemons.get(entry.getKey());
                 if (lutemon != null) {
                     result.add(lutemon);
                 }
-            }
-        }
-        return result;
+            });
+        return Collections.unmodifiableList(result);
     }
 
     public List<Lutemon> getAllLutemons() {
-        return new ArrayList<>(lutemons.values());
+        return Collections.unmodifiableList(new ArrayList<>(lutemons.values()));
     }
 
-    public void clear() {
+    public synchronized void clear() {
         lutemons.clear();
         lutemonLocations.clear();
         nextId = 1;
@@ -72,20 +90,30 @@ public class Storage implements Serializable {
         return lutemonLocations.get(id);
     }
 
-    public void removeLutemon(int id) {
+    public synchronized void removeLutemon(int id) {
         lutemons.remove(id);
         lutemonLocations.remove(id);
     }
 
     public void healAllAtHome() {
-        for (Map.Entry<Integer, Location> entry : lutemonLocations.entrySet()) {
-            if (entry.getValue() == Location.HOME) {
+        lutemonLocations.entrySet().stream()
+            .filter(entry -> entry.getValue() == Location.HOME)
+            .forEach(entry -> {
                 Lutemon lutemon = lutemons.get(entry.getKey());
                 if (lutemon != null) {
                     lutemon.heal();
                 }
-            }
-        }
+            });
+    }
+
+    public int getNextId() {
+        return nextId;
+    }
+
+    // For serialization purposes
+    protected Object readResolve() {
+        instance = this;
+        return instance;
     }
 
     public enum Location {
