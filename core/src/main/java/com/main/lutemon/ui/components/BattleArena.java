@@ -117,13 +117,19 @@ public class BattleArena extends Group {
                 int randomVariation = (int)(Math.random() * 3) - 1; // -1, 0, or 1
                 int damage = Math.max(1, attackValue + randomVariation); // Ensure at least 1 damage
 
-                // Apply damage to enemy Lutemon (defense is handled in the takeDamage method)
+                // Debug output
+                System.out.println("\n--- PLAYER ATTACK ---");
+                System.out.println("Player attacks with damage: " + damage +
+                                 " (Attack: " + attackValue + ", Variation: " + randomVariation + ")");
+
+                // Apply damage to enemy Lutemon (defense and 20% cap are handled in the takeDamage method)
                 enemyLutemon.takeDamage(damage);
 
                 // Check if enemy died
                 if (!enemyLutemon.getLutemon().isAlive()) {
                     enemyLutemon.setAnimationState(BattleLutemon.AnimationState.DIE);
                     battle.setState(BattleState.FINISHED);
+                    System.out.println("Enemy died!");
                 }
             }
 
@@ -135,13 +141,19 @@ public class BattleArena extends Group {
                 int randomVariation = (int)(Math.random() * 3) - 1; // -1, 0, or 1
                 int damage = Math.max(1, attackValue + randomVariation); // Ensure at least 1 damage
 
-                // Apply damage to player Lutemon (defense is handled in the takeDamage method)
+                // Debug output
+                System.out.println("\n--- ENEMY ATTACK ---");
+                System.out.println("Enemy attacks with damage: " + damage +
+                                 " (Attack: " + attackValue + ", Variation: " + randomVariation + ")");
+
+                // Apply damage to player Lutemon (defense and 20% cap are handled in the takeDamage method)
                 playerLutemon.takeDamage(damage);
 
                 // Check if player died
                 if (!playerLutemon.getLutemon().isAlive()) {
                     playerLutemon.setAnimationState(BattleLutemon.AnimationState.DIE);
                     battle.setState(BattleState.FINISHED);
+                    System.out.println("Player died!");
                 }
             }
         }

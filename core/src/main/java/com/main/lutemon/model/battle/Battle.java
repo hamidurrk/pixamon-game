@@ -118,6 +118,12 @@ public class Battle {
         int randomVariation = random.nextInt(3) - 1; // -1, 0, or 1
         int damage = Math.max(1, attackValue + randomVariation); // Ensure at least 1 damage
 
+        // Debug output
+        System.out.println("\n--- BATTLE ATTACK ---");
+        System.out.println("Battle: Attack with damage: " + damage +
+                         " (Attack: " + attackValue + ", Variation: " + randomVariation + ")");
+
+        // Apply damage (defense and 20% cap are handled in the takeDamage method)
         defender.takeDamage(damage);
 
         // Record battle stats if this is a finishing blow
@@ -125,6 +131,7 @@ public class Battle {
             attacker.recordBattle(true);
             defender.recordBattle(false);
             state = BattleState.FINISHED;
+            System.out.println("Battle: Defender died!");
         }
     }
 
@@ -152,6 +159,12 @@ public class Battle {
             int randomVariation = random.nextInt(3) - 1; // -1, 0, or 1
             int damage = Math.max(1, attackValue + 2 + randomVariation); // Special attack bonus + variation
 
+            // Debug output
+            System.out.println("\n--- BATTLE SPECIAL ATTACK ---");
+            System.out.println("Battle: Special attack with damage: " + damage +
+                             " (Attack: " + attackValue + ", Bonus: 2, Variation: " + randomVariation + ")");
+
+            // Apply damage (defense and 20% cap are handled in the takeDamage method)
             defender.takeDamage(damage);
 
             // Check if this was a finishing blow
@@ -159,7 +172,10 @@ public class Battle {
                 attacker.recordBattle(true);
                 defender.recordBattle(false);
                 state = BattleState.FINISHED;
+                System.out.println("Battle: Defender died from special attack!");
             }
+        } else {
+            System.out.println("Battle: Special attack missed!");
         }
     }
 

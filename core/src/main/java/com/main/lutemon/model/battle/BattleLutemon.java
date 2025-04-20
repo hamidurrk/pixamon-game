@@ -245,19 +245,46 @@ public class BattleLutemon {
 
     /**
      * Makes the Lutemon take damage.
+     * Passes the damage to the underlying Lutemon and updates animation state.
+     * The underlying Lutemon will cap damage at 20% of max health.
      *
      * @param damage The amount of damage to take
      */
     public void takeDamage(int damage) {
+        // If already dead, don't take more damage
         if (isDead) return;
 
-        lutemon.takeDamage(damage);
-        isHurt = true;
-        setAnimationState(AnimationState.HURT);
+        // Store health before damage
+        int healthBefore = lutemon.getStats().getCurrentHealth();
+        int maxHealth = lutemon.getStats().getMaxHealth();
 
+        System.out.println("BattleLutemon taking damage: " + damage +
+                         " (Current health: " + healthBefore + "/" + maxHealth + ")");
+
+        // Pass the damage to the underlying Lutemon (which will apply the 20% cap)
+        lutemon.takeDamage(damage);
+
+        // Store health after damage
+        int healthAfter = lutemon.getStats().getCurrentHealth();
+
+        // Only set hurt state if damage was actually taken
+        if (healthBefore > healthAfter) {
+            isHurt = true;
+            setAnimationState(AnimationState.HURT);
+            stateTime = 0; // Reset state time for hurt animation
+
+            // Debug output
+            System.out.println("BattleLutemon health changed: " + healthBefore + " -> " + healthAfter +
+                             " (Damage taken: " + (healthBefore - healthAfter) + ")");
+        } else {
+            System.out.println("BattleLutemon took no damage!");
+        }
+
+        // Check if Lutemon died from the damage
         if (!lutemon.isAlive()) {
             isDead = true;
             // Death animation will be set after hurt animation finishes
+            System.out.println("BattleLutemon died!");
         }
     }
 

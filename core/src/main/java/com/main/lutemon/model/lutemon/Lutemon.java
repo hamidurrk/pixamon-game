@@ -36,12 +36,43 @@ public abstract class Lutemon {
         position.add(velocity.x * delta, velocity.y * delta);
     }
 
+    /**
+     * Makes the Lutemon take damage.
+     * Damage is reduced by defense, capped at 20% of max health, and health is reduced accordingly.
+     * Ensures health cannot go below 0.
+     *
+     * @param damage The amount of damage to take
+     */
     public void takeDamage(int damage) {
-        int actualDamage = Math.max(0, damage - stats.getDefense());
-        stats.setCurrentHealth(Math.max(0, stats.getCurrentHealth() - actualDamage));
-        if (stats.getCurrentHealth() <= 0) {
-            isAlive = false;
-        }
+        // If already dead, don't take more damage
+        if (!isAlive) return;
+
+        // Calculate actual damage after defense reduction
+        int defense = stats.getDefense();
+        int actualDamage = Math.max(1, damage - defense); // Ensure at least 1 damage
+
+        // Cap damage at 20% of max health
+        int maxHealth = stats.getMaxHealth();
+        int damageLimit = (int) Math.ceil(maxHealth * 0.2); // 20% of max health, rounded up
+        actualDamage = Math.min(actualDamage, damageLimit);
+
+        // Debug output
+        System.out.println("Damage calculation: Original: " + damage +
+                         ", After defense: " + (damage - defense) +
+                         ", After 20% cap: " + actualDamage +
+                         " (Max health: " + maxHealth + ", 20% cap: " + damageLimit + ")");
+
+        // Get current health and calculate new health
+        int currentHealth = stats.getCurrentHealth();
+        int newHealth = Math.max(0, currentHealth - actualDamage);
+
+        // Update health
+        stats.setCurrentHealth(newHealth);
+        System.out.println("Health reduced: " + currentHealth + " -> " + newHealth +
+                         " (Damage taken: " + (currentHealth - newHealth) + ")");
+
+        // Update alive status
+        isAlive = newHealth > 0;
     }
 
     /**

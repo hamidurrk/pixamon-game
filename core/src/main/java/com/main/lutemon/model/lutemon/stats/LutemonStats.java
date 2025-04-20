@@ -94,7 +94,16 @@ public class LutemonStats {
     public int getMaxHealth() { return getEffectiveMaxHealth(); }
     public void setMaxHealth(int maxHealth) { this.maxHealth = maxHealth; }
     public int getCurrentHealth() { return currentHealth; }
-    public void setCurrentHealth(int currentHealth) { this.currentHealth = currentHealth; }
+
+    /**
+     * Sets the current health, ensuring it doesn't go below 0 or above max health.
+     *
+     * @param newHealth The new health value
+     */
+    public void setCurrentHealth(int newHealth) {
+        // Ensure health is between 0 and max health
+        this.currentHealth = Math.max(0, Math.min(newHealth, getEffectiveMaxHealth()));
+    }
     public int getAttack() { return getEffectiveAttack(); }
     public void setAttack(int attack) { this.attack = attack; }
     public int getDefense() { return getEffectiveDefense(); }
