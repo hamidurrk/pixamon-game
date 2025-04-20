@@ -91,6 +91,9 @@ public class TrainingScreen implements Screen {
 
         // Title
         Label titleLabel = new Label("Training", skin, "title");
+        titleLabel.setColor(0.73f, 0.48f, 0.27f, 1f);
+//        rgb(73%, 48%, 27%)
+
         mainTable.add(titleLabel).pad(Constants.getPadding()).row();
 
         // Training table
@@ -126,28 +129,13 @@ public class TrainingScreen implements Screen {
             }
         });
 
-        trainingTable.add(cancelButton).pad(20).width(200).height(60);
+        trainingTable.add(cancelButton).pad(20).width(1000).height(60);
 
         // Add training table to main table
         mainTable.add(trainingTable).expand().fill();
 
-        // Back button
-        TextButton backButton = new TextButton("Back to Home", skin);
-        backButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                game.navigateToHome();
-            }
-        });
-
-        Table topTable = new Table();
-        topTable.setFillParent(true);
-        topTable.top().right();
-        topTable.add(backButton).pad(10);
-
         // Add tables to stage
         stage.addActor(mainTable);
-        stage.addActor(topTable);
 
         // Initially hide training UI
         trainingTable.setVisible(false);
@@ -163,6 +151,7 @@ public class TrainingScreen implements Screen {
         selectionTable.setFillParent(true);
 
         Label titleLabel = new Label("Select Lutemon to Train", skin, "title");
+        titleLabel.setColor(0.44f, 0.44f, 0.60f, 1f);
         selectionTable.add(titleLabel).colspan(3).pad(20).row(); // Increased colspan to 3
 
         // Get Lutemons from storage
@@ -259,7 +248,7 @@ public class TrainingScreen implements Screen {
 
                 // Add select button at the bottom
                 TextButton selectButton = new TextButton("Train", skin);
-                selectButton.getLabel().setFontScale(1.2f);
+                selectButton.getLabel().setFontScale(1f);
                 final Lutemon finalLutemon = lutemon;
                 selectButton.addListener(new ClickListener() {
                     @Override
@@ -278,13 +267,13 @@ public class TrainingScreen implements Screen {
                 statsAndButtonTable.add(statsLabel).left().expandX();
 
                 // Add select button to the right of the stats
-                statsAndButtonTable.add(selectButton).width(250).height(80).padLeft(20).right();
+                statsAndButtonTable.add(selectButton).width(300).height(80).padLeft(20).right();
 
                 // Add the stats and button table to the container
                 lutemonContainer.add(statsAndButtonTable).expandX().fillX().padTop(15);
 
                 // Add the container to the table with spacing - increased width
-                lutemonTable.add(lutemonContainer).width(800).pad(15).row();
+                lutemonTable.add(lutemonContainer).width(1200).pad(15).row();
             }
 
             // Add the scroll pane to the selection table
@@ -292,7 +281,7 @@ public class TrainingScreen implements Screen {
 
             // Back button - increased size
             TextButton backButton = new TextButton("Back to Home", skin);
-            backButton.getLabel().setFontScale(1.5f);
+            backButton.getLabel().setFontScale(1f);
             backButton.addListener(new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
@@ -300,7 +289,7 @@ public class TrainingScreen implements Screen {
                 }
             });
 
-            selectionTable.add(backButton).colspan(3).width(300).height(80).pad(25); // Increased size
+            selectionTable.add(backButton).colspan(3).width(800).height(80).pad(25); // Increased size
         }
 
         selectionStage.addActor(selectionTable);
@@ -371,8 +360,14 @@ public class TrainingScreen implements Screen {
         int oldDefense = selectedLutemon.getStats().getDefense();
         int oldMaxHealth = selectedLutemon.getStats().getMaxHealth();
 
-        // Award experience
-        selectedLutemon.addExperience(1);
+        // Award experience and increment training days
+        selectedLutemon.train();
+
+        // Also increment the total training sessions in StatisticsManager
+        com.main.lutemon.utils.StatisticsManager.getInstance().incrementTotalTrainingSessions();
+
+        Gdx.app.log("TrainingScreen", "Completed training for " + selectedLutemon.getName() +
+                  ", Training days: " + selectedLutemon.getStats().getTrainingDays());
 
         // Get stats after training
         int newAttack = selectedLutemon.getStats().getAttack();

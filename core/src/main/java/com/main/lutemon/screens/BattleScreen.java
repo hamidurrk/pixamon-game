@@ -53,7 +53,7 @@ public class BattleScreen implements Screen {
     private boolean resultDialogScheduled;
     private float resultDialogTimer;
     private MatchResultDialog resultDialog;
-    private static final float RESULT_DIALOG_DELAY = 2.0f; // 2 seconds delay
+    private static final float RESULT_DIALOG_DELAY = 4.0f;
 
     /**
      * Creates a new battle screen.
@@ -73,35 +73,26 @@ public class BattleScreen implements Screen {
 
         initialize();
 
-        // Create input multiplexer to handle both stage and keyboard input
         inputMultiplexer = new InputMultiplexer();
         inputMultiplexer.addProcessor(stage);
-//        inputMultiplexer.addProcessor(new BattleInputProcessor());
     }
 
     /**
      * Initializes the battle screen.
      */
     private void initialize() {
-        // Create main stage
+        // main stage
         stage = new Stage(new FitViewport(Constants.getScreenWidth(), Constants.getScreenHeight(), camera));
 
-        // Create selection stage
+        //  selection stage
         selectionStage = new Stage(new FitViewport(Constants.getScreenWidth(), Constants.getScreenHeight(), camera));
 
-        // Set input processor to selection stage initially
         Gdx.input.setInputProcessor(selectionStage);
 
-        // Load background
         backgroundTexture = game.getAssetLoader().getBackground("battle");
 
-        // Create UI
         createUI();
-
-        // Create selection UI
         createSelectionUI();
-
-        // Create battle fragment
         battleFragment = new BattleFragment(this, game.getAssetLoader().getSkin());
     }
 
@@ -117,7 +108,7 @@ public class BattleScreen implements Screen {
         Label titleLabel = new Label("Battle Arena", game.getAssetLoader().getSkin(), "title");
         mainTable.add(titleLabel).pad(Constants.getPadding()).row();
 
-        // Controls table (bottom of screen)
+        // Controls table (positioned above battle arena)
         controlsTable = new Table();
         controlsTable.setFillParent(true);
         controlsTable.bottom();
@@ -131,10 +122,10 @@ public class BattleScreen implements Screen {
         TextButton rightButton = new TextButton(">", game.getAssetLoader().getSkin());
 
         // Style the buttons to be more visible
-        leftButton.getLabel().setFontScale(2.5f);
-        rightButton.getLabel().setFontScale(2.5f);
+        leftButton.getLabel().setFontScale(4.5f);
+        rightButton.getLabel().setFontScale(4.5f);
 
-        // Add visual feedback for button presses
+        // Added visual feedback for button presses
         leftButton.addListener(new ClickListener() {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
@@ -146,7 +137,7 @@ public class BattleScreen implements Screen {
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
                 leftPressed = false;
-                leftButton.setColor(Color.WHITE); // Reset color
+                leftButton.setColor(Color.WHITE);
             }
         });
 
@@ -154,20 +145,20 @@ public class BattleScreen implements Screen {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
                 rightPressed = true;
-                rightButton.setColor(0.7f, 0.7f, 1.0f, 1.0f); // Visual feedback
+                rightButton.setColor(0.7f, 0.7f, 1.0f, 1.0f);
                 return true;
             }
 
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
                 rightPressed = false;
-                rightButton.setColor(Color.WHITE); // Reset color
+                rightButton.setColor(Color.WHITE);
             }
         });
 
-        // Make buttons larger and more spaced
-        directionTable.add(leftButton).size(120, 120).pad(15);
-        directionTable.add(rightButton).size(120, 120).pad(15);
+        // Make buttons even larger with increased spacing
+        directionTable.add(leftButton).size(220, 220).pad(25);
+        directionTable.add(rightButton).size(220, 220).pad(25);
 
         // Create action buttons (right side)
         Table actionTable = new Table();
@@ -178,8 +169,8 @@ public class BattleScreen implements Screen {
         TextButton defendButton = new TextButton("B", game.getAssetLoader().getSkin());
 
         // Style the buttons to be more visible
-        attackButton.getLabel().setFontScale(1.8f);
-        defendButton.getLabel().setFontScale(1.8f);
+        attackButton.getLabel().setFontScale(4.0f);
+        defendButton.getLabel().setFontScale(4.0f);
 
         // Add visual feedback and better click handling
         attackButton.addListener(new ClickListener() {
@@ -194,14 +185,14 @@ public class BattleScreen implements Screen {
 
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                attackButton.setColor(Color.WHITE); // Reset color
+                attackButton.setColor(Color.WHITE);
             }
         });
 
         defendButton.addListener(new ClickListener() {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                defendButton.setColor(0.7f, 1.0f, 0.7f, 1.0f); // Visual feedback - greenish
+                defendButton.setColor(0.7f, 1.0f, 0.7f, 1.0f);
                 if (battleArena != null && !matchEnded) {
                     battleArena.playerDefend();
                 }
@@ -210,39 +201,19 @@ public class BattleScreen implements Screen {
 
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                defendButton.setColor(Color.WHITE); // Reset color
+                defendButton.setColor(Color.WHITE);
             }
         });
 
-        // Make buttons larger and more spaced
-        actionTable.add(attackButton).size(140, 120).pad(15);
-        actionTable.add(defendButton).size(140, 120).pad(15);
+        actionTable.add(attackButton).size(230, 220).pad(25);
+        actionTable.add(defendButton).size(230, 220).pad(25);
 
-        // Add back button
-        TextButton backButton = new TextButton("Back to Home", game.getAssetLoader().getSkin());
-        backButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                game.navigateToHome();
-            }
-        });
-
-        // Add to controls table - position at bottom of screen
-        controlsTable.add(directionTable).expand().left().bottom().pad(20);
-        controlsTable.add(actionTable).expand().right().bottom().pad(20);
-
-        // Add back button at the top
-        Table topTable = new Table();
-        topTable.setFillParent(true);
-        topTable.top().right();
-        topTable.add(backButton).pad(10);
+        controlsTable.add(directionTable).expand().left().bottom().pad(50);
+        controlsTable.add(actionTable).expand().right().bottom().pad(50);
 
         // Add tables to stage
         stage.addActor(mainTable);
         stage.addActor(controlsTable);
-        stage.addActor(topTable);
-
-        // Initially hide controls until battle starts
         controlsTable.setVisible(false);
     }
 
@@ -266,7 +237,6 @@ public class BattleScreen implements Screen {
      * Updates the selection UI with current Lutemons.
      */
     private void updateSelectionUI() {
-        // Clear existing content except title
         selectionTable.clear();
 
         // Set appropriate title based on whether player Lutemon is already selected
@@ -294,7 +264,6 @@ public class BattleScreen implements Screen {
             return;
         }
 
-        // Create scrollable container
         Table lutemonTable = new Table();
         lutemonTable.top();
 
@@ -446,9 +415,12 @@ public class BattleScreen implements Screen {
         leftPressed = false;
         rightPressed = false;
 
-        // Reset Lutemons
+        // Reset Lutemons and move them to BATTLE location
         playerLutemon.heal();
         opponentLutemon.heal();
+
+        // Move Lutemons to BATTLE location
+        Storage.getInstance().moveToLocation(playerLutemon.getId(), Storage.Location.BATTLE);
 
         // Clear any existing battle elements
         if (battleArena != null) {
@@ -464,19 +436,19 @@ public class BattleScreen implements Screen {
 
         // Create battle
         currentBattle = new Battle(playerLutemon, opponentLutemon);
-        currentBattle.setState(BattleState.IN_PROGRESS); // Explicitly set state to IN_PROGRESS
+        currentBattle.setState(BattleState.IN_PROGRESS);
 
         // Create battle arena
         battleArena = new BattleArena(
             Constants.getScreenWidth(),
-            Constants.getScreenHeight() - 150, // Leave space for controls
+            Constants.getScreenHeight() - 450,
             currentBattle,
             game.getAssetLoader().getSkin(),
             game.getAssetLoader()
         );
 
         // Position arena - leave more space at bottom for controls
-        battleArena.setPosition(0, 150);
+        battleArena.setPosition(0, 350);
 
         // Add arena to stage
         stage.addActor(battleArena);
@@ -564,9 +536,13 @@ public class BattleScreen implements Screen {
         leftPressed = false;
         rightPressed = false;
 
-        // Reset Lutemons
+        // Reset Lutemons and move them to BATTLE location
         playerLutemon.heal();
         opponentLutemon.heal();
+
+        // Move Lutemons to BATTLE location
+        Storage.getInstance().moveToLocation(playerLutemon.getId(), Storage.Location.BATTLE);
+        // Note: We don't move the opponent to BATTLE location as it might not be in Storage
 
         // Clear existing battle elements
         if (battleArena != null) {
@@ -582,19 +558,19 @@ public class BattleScreen implements Screen {
 
         // Create battle
         currentBattle = new Battle(playerLutemon, opponentLutemon);
-        currentBattle.setState(BattleState.IN_PROGRESS); // Explicitly set state to IN_PROGRESS
+        currentBattle.setState(BattleState.IN_PROGRESS);
 
         // Create battle arena
         battleArena = new BattleArena(
             Constants.getScreenWidth(),
-            Constants.getScreenHeight() - 150, // Leave space for controls
+            Constants.getScreenHeight() - 450,
             currentBattle,
             game.getAssetLoader().getSkin(),
             game.getAssetLoader()
         );
 
         // Position arena - leave more space at bottom for controls
-        battleArena.setPosition(0, 150);
+        battleArena.setPosition(0, 350);
 
         // Add arena to stage
         stage.addActor(battleArena);
@@ -772,42 +748,4 @@ public class BattleScreen implements Screen {
         return stage;
     }
 
-    /**
-     * Input processor for handling keyboard input during battle.
-     */
-//    private class BattleInputProcessor extends InputAdapter {
-//        @Override
-//        public boolean keyDown(int keycode) {
-//            if (keycode == Input.Keys.LEFT) {
-//                leftPressed = true;
-//                return true;
-//            } else if (keycode == Input.Keys.RIGHT) {
-//                rightPressed = true;
-//                return true;
-//            } else if (keycode == Input.Keys.Z || keycode == Input.Keys.SPACE) {
-//                if (battleArena != null) {
-//                    battleArena.playerAttack();
-//                }
-//                return true;
-//            } else if (keycode == Input.Keys.X || keycode == Input.Keys.SHIFT_LEFT) {
-//                if (battleArena != null) {
-//                    battleArena.playerDefend();
-//                }
-//                return true;
-//            }
-//            return false;
-//        }
-//
-//        @Override
-//        public boolean keyUp(int keycode) {
-//            if (keycode == Input.Keys.LEFT) {
-//                leftPressed = false;
-//                return true;
-//            } else if (keycode == Input.Keys.RIGHT) {
-//                rightPressed = false;
-//                return true;
-//            }
-//            return false;
-//        }
-//    }
 }

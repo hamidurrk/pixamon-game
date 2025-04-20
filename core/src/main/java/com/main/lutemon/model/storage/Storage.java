@@ -1,6 +1,7 @@
 package com.main.lutemon.model.storage;
 
 import com.main.lutemon.model.lutemon.*;
+import com.main.lutemon.utils.StatisticsManager;
 import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -36,6 +37,33 @@ public class Storage implements Serializable {
         lutemon.setId(nextId++);
         lutemons.put(lutemon.getId(), lutemon);
         lutemonLocations.put(lutemon.getId(), Location.HOME);
+
+        StatisticsManager.getInstance().incrementLutemonsCreated();
+    }
+
+    /**
+     * Adds a Lutemon to storage without incrementing statistics.
+     * This is used when loading Lutemons from a profile.
+     *
+     * @param lutemon The Lutemon to add
+     */
+    public synchronized void addLutemonWithoutStats(Lutemon lutemon) {
+        if (lutemon == null) {
+            throw new IllegalArgumentException("Lutemon cannot be null");
+        }
+
+        if (lutemon.getId() >= nextId) {
+            nextId = lutemon.getId() + 1;
+        }
+
+        lutemons.put(lutemon.getId(), lutemon);
+        lutemonLocations.put(lutemon.getId(), Location.HOME);
+
+        // Log the addition but don't increment statistics
+        System.out.println("Added Lutemon without incrementing stats: " + lutemon.getName() + " (ID: " + lutemon.getId() + ")");
+        com.badlogic.gdx.Gdx.app.log("Storage", "Added Lutemon without incrementing stats: " +
+                                  lutemon.getName() + " (ID: " + lutemon.getId() + ", Type: " +
+                                  lutemon.getType() + ", Location: HOME)");
     }
 
     public synchronized void moveToLocation(int lutemonId, Location location) {
@@ -60,8 +88,12 @@ public class Storage implements Serializable {
                 Lutemon lutemon = lutemons.get(entry.getKey());
                 if (lutemon != null) {
                     result.add(lutemon);
+                    com.badlogic.gdx.Gdx.app.log("Storage", "Found Lutemon at location " + location + ": " +
+                                              lutemon.getName() + " (ID: " + lutemon.getId() + ")");
                 }
             });
+
+        com.badlogic.gdx.Gdx.app.log("Storage", "Found " + result.size() + " Lutemons at location: " + location);
         return Collections.unmodifiableList(result);
     }
 
@@ -70,15 +102,35 @@ public class Storage implements Serializable {
     }
 
     public synchronized void clear() {
+        int lutemonCount = lutemons.size();
+        System.out.println("Clearing storage - removing " + lutemonCount + " Lutemons");
+
         lutemons.clear();
         lutemonLocations.clear();
         nextId = 1;
+
+        System.out.println("Storage cleared successfully");
     }
 
     public void trainLutemon(int id) {
         Lutemon lutemon = lutemons.get(id);
         if (lutemon != null && lutemonLocations.get(id) == Location.TRAINING) {
+            // Train the lutemon (this increments both experience and training days)
             lutemon.train();
+
+            // Track statistics
+            StatisticsManager.getInstance().incrementTotalTrainingSessions();
+
+            // Log the training
+            com.badlogic.gdx.Gdx.app.log("Storage", "Trained lutemon: " + lutemon.getName() +
+                                      ", Training days: " + lutemon.getStats().getTrainingDays() +
+                                      ", Total training sessions: " + StatisticsManager.getInstance().getTotalTrainingSessions());
+        } else {
+            if (lutemon == null) {
+                com.badlogic.gdx.Gdx.app.error("Storage", "Cannot train lutemon with ID " + id + ": lutemon not found");
+            } else {
+                com.badlogic.gdx.Gdx.app.error("Storage", "Cannot train lutemon " + lutemon.getName() + ": not in TRAINING location");
+            }
         }
     }
 

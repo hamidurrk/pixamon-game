@@ -18,24 +18,22 @@ public class AndroidLauncher extends AndroidApplication {
         super.onCreate(savedInstanceState);
 
         try {
-            // First, ensure native libraries are loaded
             Log.i(TAG, "Loading native libraries...");
             try {
                 System.loadLibrary("gdx");
                 Log.i(TAG, "Successfully loaded libgdx.so");
             } catch (UnsatisfiedLinkError e) {
                 Log.e(TAG, "Failed to load native libraries manually: " + e.getMessage());
-                // Let GDX try to load it itself
+
                 try {
                     GdxNativesLoader.load();
                     Log.i(TAG, "Successfully loaded natives via GdxNativesLoader");
                 } catch (Exception ex) {
                     Log.e(TAG, "GdxNativesLoader also failed: " + ex.getMessage());
-                    // Continue anyway - sometimes the libraries might be found later
+
                 }
             }
 
-            // Configure the application
             AndroidApplicationConfiguration config = new AndroidApplicationConfiguration();
             config.useAccelerometer = false;
             config.useCompass = false;
@@ -43,7 +41,6 @@ public class AndroidLauncher extends AndroidApplication {
             config.useRotationVectorSensor = false;
             config.useWakelock = true; // Prevent screen from going to sleep
 
-            // Initialize the game
             Log.i(TAG, "Initializing Lutemon game...");
             initialize(new LutemonGame(), config);
             Log.i(TAG, "Game initialized successfully");
@@ -63,7 +60,7 @@ public class AndroidLauncher extends AndroidApplication {
                 initialize(new LutemonGame(), config);
             } catch (Exception ex) {
                 Log.e(TAG, "Fatal error, could not recover: " + ex.getMessage(), ex);
-                finish(); // Close the app as a last resort
+                finish();
             }
         }
     }

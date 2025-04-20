@@ -25,7 +25,6 @@ public abstract class Lutemon {
         this.stateTime = 0;
         this.animationSpeed = 0.1f;
 
-        // Initialize stats based on type
         initializeStats();
     }
 
@@ -44,34 +43,21 @@ public abstract class Lutemon {
      * @param damage The amount of damage to take
      */
     public void takeDamage(int damage) {
-        // If already dead, don't take more damage
         if (!isAlive) return;
 
-        // Calculate actual damage after defense reduction
         int defense = stats.getDefense();
-        int actualDamage = Math.max(1, damage - defense); // Ensure at least 1 damage
+        int actualDamage = Math.max(1, damage - defense);
 
-        // Cap damage at 20% of max health
         int maxHealth = stats.getMaxHealth();
-        int damageLimit = (int) Math.ceil(maxHealth * 0.2); // 20% of max health, rounded up
+        int damageLimit = (int) Math.ceil(maxHealth * 0.2);
         actualDamage = Math.min(actualDamage, damageLimit);
 
-        // Debug output
-        System.out.println("Damage calculation: Original: " + damage +
-                         ", After defense: " + (damage - defense) +
-                         ", After 20% cap: " + actualDamage +
-                         " (Max health: " + maxHealth + ", 20% cap: " + damageLimit + ")");
-
-        // Get current health and calculate new health
         int currentHealth = stats.getCurrentHealth();
         int newHealth = Math.max(0, currentHealth - actualDamage);
 
-        // Update health
         stats.setCurrentHealth(newHealth);
         System.out.println("Health reduced: " + currentHealth + " -> " + newHealth +
                          " (Damage taken: " + (currentHealth - newHealth) + ")");
-
-        // Update alive status
         isAlive = newHealth > 0;
     }
 
@@ -104,7 +90,8 @@ public abstract class Lutemon {
         stats.incrementBattles();
         if (won) {
             stats.incrementWins();
-            stats.incrementExperience();
+            stats.incrementExperience(); // Bonus experience for winning
+            System.out.println(name + " gained 1 experience point for winning");
         }
     }
 

@@ -90,6 +90,19 @@ public class AnimationManager {
                 int    rows         = animNode.getInt("rows", 1);
                 float  frameDur     = animNode.getFloat("frameDuration", 0.50f);
 
+                // Adjust frame durations for specific animation types to make gameplay smoother
+                if (animName.equals("attack")) {
+                    frameDur = 0.1f; // Faster attack animations
+                } else if (animName.equals("hurt")) {
+                    frameDur = 0.08f; // Faster hurt animations
+                } else if (animName.equals("run")) {
+                    frameDur = 0.12f; // Faster run animations
+                } else if (animName.equals("idle")) {
+                    frameDur = 0.4f; // Slower idle animations for contrast
+                } else if (animName.equals("die")) {
+                    frameDur = 0.2f; // Slower die animations for more impact
+                }
+
                 try {
                     // load sheet and split into regions
                     Texture sheet = new Texture(Gdx.files.internal("lutemons/sprites/" + fileName));

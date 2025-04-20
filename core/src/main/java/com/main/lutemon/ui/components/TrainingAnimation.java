@@ -15,11 +15,11 @@ public class TrainingAnimation extends Widget {
     private Lutemon lutemon;
     private AnimationManager animationManager;
     private float stateTime;
-    private float runAnimationDuration = 3.0f; // Duration for run animation
-    private float minAttackDisplayTime = 1.0f; // Minimum time to display attack animation
+    private float runAnimationDuration = 3.0f;
+    private float minAttackDisplayTime = 1.0f;
     private int currentAnimationIndex;
-    private final String[] animationTypes = {"run", "attack"}; // Removed idle animation
-    private float scale = 9.0f; // Increased size 3x
+    private final String[] animationTypes = {"run", "attack"};
+    private float scale = 9.0f;
     private boolean waitingForAnimationToFinish;
 
     /**
@@ -30,7 +30,6 @@ public class TrainingAnimation extends Widget {
         this.stateTime = 0;
         this.currentAnimationIndex = 0;
 
-        // Set initial size (will be updated in draw)
         setSize(200, 200);
     }
 
@@ -109,13 +108,12 @@ public class TrainingAnimation extends Widget {
             float textureHeight = currentFrame.getRegionHeight();
 
             // Use fixed size for all animations to prevent jittering
-            float fixedWidth = 64 * scale; // Standard width for all animations
-            float fixedHeight = 64 * scale; // Standard height for all animations
+            float fixedWidth = 64 * scale;
+            float fixedHeight = 64 * scale;
             setSize(fixedWidth, fixedHeight);
 
-            // Center the animation in the widget with fixed positioning
             float x = getX() + (fixedWidth - textureWidth * scale) / 2;
-            float y = getY() + (fixedHeight - textureHeight * scale) / 2 + 20; // Added vertical offset
+            float y = getY() + (fixedHeight - textureHeight * scale) / 2 + 20;
 
             // Draw the character
             batch.draw(

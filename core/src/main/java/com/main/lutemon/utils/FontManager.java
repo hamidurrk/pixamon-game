@@ -47,6 +47,8 @@ public class FontManager {
                 // Generate title font
                 parameter.size = Constants.getTitleFontSize();
                 parameter.color = Color.WHITE;
+                parameter.borderWidth = 3f; // Add black outline
+                parameter.borderColor = Color.BLACK;
                 parameter.minFilter = Texture.TextureFilter.Linear;
                 parameter.magFilter = Texture.TextureFilter.Linear;
                 titleFont = generator.generateFont(parameter);

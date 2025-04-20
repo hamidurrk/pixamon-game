@@ -11,9 +11,11 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.main.lutemon.model.lutemon.*;
 import com.main.lutemon.model.storage.Storage;
+import com.main.lutemon.model.storage.Storage.Location;
 import com.main.lutemon.screens.HomeScreen;
 import com.main.lutemon.ui.components.AnimatedAvatar;
 import com.main.lutemon.utils.Constants;
+import com.main.lutemon.utils.ProfileManager;
 
 import java.util.List;
 
@@ -57,6 +59,15 @@ public class HomeFragment extends Table {
         lutemonTable.top().left();  // Ensure alignment to top-left
 
         List<Lutemon> lutemons = Storage.getInstance().getLutemonsAtLocation(Storage.Location.HOME);
+        Gdx.app.log("HomeFragment", "Updating lutemon list with " + lutemons.size() + " lutemons at HOME");
+
+        // Also log all lutemons in storage for debugging
+        List<Lutemon> allLutemons = Storage.getInstance().getAllLutemons();
+        Gdx.app.log("HomeFragment", "Total lutemons in storage: " + allLutemons.size());
+        for (Lutemon lutemon : allLutemons) {
+            Gdx.app.log("HomeFragment", "Lutemon in storage: " + lutemon.getName() +
+                      ", Location: " + Storage.getInstance().getLutemonLocation(lutemon.getId()));
+        }
 
         float padding = Constants.getPadding();
         float rowHeight = height * 0.45f;
@@ -108,7 +119,7 @@ public class HomeFragment extends Table {
             }
             if (lutemon.getType() == LutemonType.GREEN) {
                 avatarSize = height * 0.6f;
-                avatarPaddingBottom = 0;
+                avatarPaddingBottom = 200;
             }
             if (lutemon.getType() == LutemonType.BLACK) {
                 avatarPaddingBottom = 50;
@@ -128,48 +139,83 @@ public class HomeFragment extends Table {
 
             // Stats column
             Table statsTable = new Table();
-            // Add a container table to ensure consistent alignment
             statsTable.defaults().left().padBottom(5);
 
-            statsTable.add(new Label("HP: " + lutemon.getStats().getCurrentHealth() + "/" +
-                         lutemon.getStats().getMaxHealth(), skin)).row();
-            statsTable.add(new Label("ATK: " + lutemon.getStats().getAttack() +
-                         " DEF: " + lutemon.getStats().getDefense(), skin)).row();
-            statsTable.add(new Label("EXP: " + lutemon.getStats().getExperience(), skin));
+            // Get the stats
+            int currentHealth = lutemon.getStats().getCurrentHealth();
+            int maxHealth = lutemon.getStats().getMaxHealth();
+            int attack = lutemon.getStats().getAttack();
+            int defense = lutemon.getStats().getDefense();
+            int experience = lutemon.getStats().getExperience();
+
+            Gdx.app.log("HomeFragment", "Lutemon stats - HP: " + currentHealth + "/" + maxHealth +
+                      ", ATK: " + attack + ", DEF: " + defense + ", EXP: " + experience);
+
+            statsTable.add(new Label("HP: " + currentHealth + "/" + maxHealth, skin)).row();
+            statsTable.add(new Label("ATK: " + attack + " DEF: " + defense, skin)).row();
+            statsTable.add(new Label("EXP: " + experience, skin));
 
             lutemonRow.add(statsTable).width(statsColumnWidth).left().pad(padding);
 
             lutemonTable.add(lutemonRow).expandX().fillX().height(rowHeight).pad(5).row();
         }
 
-        // Ensure the tables are properly sized but don't set fillParent which can cause alignment issues
         lutemonTable.setSize(width, height);
 
-        // Force the scroll to the top
         scrollPane.setScrollY(0);
         scrollPane.updateVisualScroll();
-
-        // Debug final table structure
-//        Gdx.app.log("HomeFragment", "Table structure: " + table.toString());
     }
 
     private void createDefaultLutemons() {
         Storage storage = Storage.getInstance();
 
-        // Add debug logging
-        Gdx.app.log("HomeFragment", "Creating default Lutemons");
+        Gdx.app.log("HomeFragment", "Checking if default Lutemons should be created");
 
-        // Create default Lutemons if they don't exist
-        if (storage.getLutemonsAtLocation(Storage.Location.HOME).isEmpty()) {
+        // Only create default Lutemons for new profiles
+        boolean isNewProfile = ProfileManager.getInstance().isNewProfile();
+        boolean hasNoLutemons = storage.getAllLutemons().isEmpty();
+
+        Gdx.app.log("HomeFragment", "Profile is new: " + isNewProfile + ", has no lutemons: " + hasNoLutemons);
+
+        if (hasNoLutemons && isNewProfile) {
+
+            Gdx.app.log("HomeFragment", "Creating default Lutemons for new profile");
+
+            // Create default lutemons and make sure they're counted in the statistics
             storage.addLutemon(new WhiteLutemon(storage.getNextId(), "White Warrior"));
             storage.addLutemon(new GreenLutemon(storage.getNextId(), "Green Fighter"));
             storage.addLutemon(new PinkLutemon(storage.getNextId(), "Pink Striker"));
             storage.addLutemon(new OrangeLutemon(storage.getNextId(), "Orange Blade"));
             storage.addLutemon(new BlackLutemon(storage.getNextId(), "Black Shadow"));
 
+            // Log the total lutemons created
+            com.main.lutemon.utils.StatisticsManager statsManager = com.main.lutemon.utils.StatisticsManager.getInstance();
+            Gdx.app.log("HomeFragment", "Total lutemons created after adding default lutemons: " +
+                      statsManager.getTotalLutemonsCreated());
+
+            Gdx.app.log("HomeFragment", "Added 5 default lutemons to the new profile");
+
             // Verify Lutemons were added
             Gdx.app.log("HomeFragment", "Created " +
                 storage.getLutemonsAtLocation(Storage.Location.HOME).size() + " default Lutemons");
+
+            // Save the game to persist the default Lutemons
+            screen.getGame().saveGame();
+        } else {
+            Gdx.app.log("HomeFragment", "No default Lutemons needed");
+
+            List<Lutemon> existingLutemons = storage.getAllLutemons();
+            Gdx.app.log("HomeFragment", "Found " + existingLutemons.size() + " existing Lutemons");
+
+            // Make sure all lutemons are at HOME location
+            for (Lutemon lutemon : existingLutemons) {
+                Location currentLocation = storage.getLutemonLocation(lutemon.getId());
+                if (currentLocation != Storage.Location.HOME) {
+                    Gdx.app.log("HomeFragment", "Moving Lutemon " + lutemon.getName() + " from " +
+                              currentLocation + " to HOME");
+                    storage.moveToLocation(lutemon.getId(), Storage.Location.HOME);
+                }
+            }
         }
 
         updateLutemonList();
@@ -207,6 +253,4 @@ public class HomeFragment extends Table {
         pixmap.dispose();
         return background;
     }
-
-    // getTable() method removed
 }

@@ -4,13 +4,16 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.main.lutemon.LutemonGame;
+import com.main.lutemon.ui.dialogs.CreateProfileDialog;
 import com.main.lutemon.utils.Constants;
 
 public class MainMenuScreen implements Screen {
@@ -40,9 +43,14 @@ public class MainMenuScreen implements Screen {
         Table table = new Table();
         table.setFillParent(true);
 
-        // Title
-        Label titleLabel = new Label("Lutemon Game", game.getAssetLoader().getSkin(), "title");
-        table.add(titleLabel).pad(Constants.getPadding() * 5).row();
+        // Title image instead of label
+        titleTexture = new Texture(Gdx.files.internal("title.png"));
+        Image titleImage = new Image(new TextureRegionDrawable(new TextureRegion(titleTexture)));
+        // Scale the image to fit nicely
+        float titleWidth = Constants.getScreenWidth() * 0.4f; // 70% of screen width
+        float aspectRatio = (float)titleTexture.getHeight() / titleTexture.getWidth();
+        float titleHeight = titleWidth * aspectRatio;
+        table.add(titleImage).size(titleWidth, titleHeight).pad(Constants.getPadding() * 4, 0, Constants.getPadding() * 2, 0).center().row();
 
         // Button dimensions
         float buttonWidth = Constants.getButtonWidth();
@@ -57,7 +65,21 @@ public class MainMenuScreen implements Screen {
         newGameButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                game.navigateToHome();
+                showCreateProfileDialog();
+            }
+        });
+
+        loadGameButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                game.setScreen(new ProfileSelectionScreen(game));
+            }
+        });
+
+        exitButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                Gdx.app.exit();
             }
         });
 
@@ -72,6 +94,14 @@ public class MainMenuScreen implements Screen {
         Dialog dialog = new Dialog("Error", game.getAssetLoader().getSkin());
         dialog.text(message);
         dialog.button("OK");
+        dialog.show(stage);
+    }
+
+    /**
+     * Shows the dialog for creating a new profile.
+     */
+    private void showCreateProfileDialog() {
+        CreateProfileDialog dialog = new CreateProfileDialog(this, game.getAssetLoader().getSkin());
         dialog.show(stage);
     }
 
@@ -106,10 +136,16 @@ public class MainMenuScreen implements Screen {
         createUI();
     }
 
+    private Texture titleTexture; // Add field to track the title texture
+
     @Override
     public void dispose() {
         stage.dispose();
         backgroundTexture.getTexture().dispose();
+        // Dispose the title texture if it was created
+        if (titleTexture != null) {
+            titleTexture.dispose();
+        }
     }
 
     @Override
@@ -123,4 +159,13 @@ public class MainMenuScreen implements Screen {
     public void resume() {}
     @Override
     public void hide() {}
+
+    /**
+     * Gets the game instance.
+     *
+     * @return The game instance
+     */
+    public LutemonGame getGame() {
+        return game;
+    }
 }

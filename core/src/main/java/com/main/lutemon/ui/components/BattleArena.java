@@ -48,7 +48,7 @@ public class BattleArena extends Group {
         this.backgroundTexture = assetLoader.getBackground("battle");
 
         // Create battle Lutemons
-        float groundLevel = height * 0.25f; // Lower ground level to accommodate larger characters
+        float groundLevel = height * 0.1f; // Lower ground level to accommodate larger characters
         this.playerLutemon = new BattleLutemon(
             battle.getPlayerLutemon(),
             width * 0.15f, // Position player more to the left
@@ -67,15 +67,15 @@ public class BattleArena extends Group {
         this.enemyLutemon.setDirection(BattleLutemon.Direction.LEFT);
         this.enemyLutemon.setAnimationState(BattleLutemon.AnimationState.IDLE);
         this.enemyLutemon.stopMoving();
-        this.enemyLutemon.getPosition().x = width * 0.85f - 100; // Adjust for larger character width
+        this.enemyLutemon.getPosition().x = width * 0.85f - 100;
 
-        // Create battle characters with much larger scale
-        this.playerCharacter = new BattleCharacter(playerLutemon, 5.0f);
-        this.enemyCharacter = new BattleCharacter(enemyLutemon, 5.0f);
+        // Create battle characters
+        this.playerCharacter = new BattleCharacter(playerLutemon, 9.0f);
+        this.enemyCharacter = new BattleCharacter(enemyLutemon, 9.0f);
 
         // Create health bars
-        this.playerHealthBar = new HealthBar(width * 0.1f, height * 0.8f, width * 0.3f, battle.getPlayerLutemon());
-        this.enemyHealthBar = new HealthBar(width * 0.6f, height * 0.8f, width * 0.3f, battle.getEnemyLutemon());
+        this.playerHealthBar = new HealthBar(width * 0.1f, height * 1.5f, width * 0.3f, battle.getPlayerLutemon());
+        this.enemyHealthBar = new HealthBar(width * 0.6f, height * 1.5f, width * 0.3f, battle.getEnemyLutemon());
 
         // Create name labels
         this.playerNameLabel = new Label(battle.getPlayerLutemon().getName(), skin);
@@ -108,8 +108,11 @@ public class BattleArena extends Group {
 
         // Only process gameplay logic if battle is still in progress
         if (battle.getState() == BattleState.IN_PROGRESS) {
-            // Check for attacks
-            if (playerLutemon.isAttacking() && playerLutemon.attackHits(enemyLutemon)) {
+            // Check for attacks - only apply damage once per attack animation
+            if (playerLutemon.isAttacking() && !playerLutemon.hasDealtDamage() && playerLutemon.attackHits(enemyLutemon)) {
+                // Mark that damage has been dealt for this attack
+                playerLutemon.setHasDealtDamage(true);
+
                 // Get attack value from player Lutemon
                 int attackValue = playerLutemon.getLutemon().getStats().getAttack();
 
@@ -118,9 +121,9 @@ public class BattleArena extends Group {
                 int damage = Math.max(1, attackValue + randomVariation); // Ensure at least 1 damage
 
                 // Debug output
-                System.out.println("\n--- PLAYER ATTACK ---");
-                System.out.println("Player attacks with damage: " + damage +
-                                 " (Attack: " + attackValue + ", Variation: " + randomVariation + ")");
+                Gdx.app.log("BattleArena", "\n--- PLAYER ATTACK ---");
+                Gdx.app.log("BattleArena", "Player attacks with damage: " + damage +
+                            " (Attack: " + attackValue + ", Variation: " + randomVariation + ")");
 
                 // Apply damage to enemy Lutemon (defense and 20% cap are handled in the takeDamage method)
                 enemyLutemon.takeDamage(damage);
@@ -133,7 +136,10 @@ public class BattleArena extends Group {
                 }
             }
 
-            if (enemyLutemon.isAttacking() && enemyLutemon.attackHits(playerLutemon)) {
+            if (enemyLutemon.isAttacking() && !enemyLutemon.hasDealtDamage() && enemyLutemon.attackHits(playerLutemon)) {
+                // Mark that damage has been dealt for this attack
+                enemyLutemon.setHasDealtDamage(true);
+
                 // Get attack value from enemy Lutemon
                 int attackValue = enemyLutemon.getLutemon().getStats().getAttack();
 
@@ -142,9 +148,9 @@ public class BattleArena extends Group {
                 int damage = Math.max(1, attackValue + randomVariation); // Ensure at least 1 damage
 
                 // Debug output
-                System.out.println("\n--- ENEMY ATTACK ---");
-                System.out.println("Enemy attacks with damage: " + damage +
-                                 " (Attack: " + attackValue + ", Variation: " + randomVariation + ")");
+                Gdx.app.log("BattleArena", "\n--- ENEMY ATTACK ---");
+                Gdx.app.log("BattleArena", "Enemy attacks with damage: " + damage +
+                            " (Attack: " + attackValue + ", Variation: " + randomVariation + ")");
 
                 // Apply damage to player Lutemon (defense and 20% cap are handled in the takeDamage method)
                 playerLutemon.takeDamage(damage);
@@ -221,6 +227,12 @@ public class BattleArena extends Group {
         return enemyLutemon;
     }
 
+    // AI state tracking
+    private float aiActionTimer = 0;
+    private float aiActionInterval = 0.8f; // Time between AI decisions
+    private boolean aiWantsToAttack = false;
+    private boolean aiWantsToDefend = false;
+
     /**
      * Updates the enemy AI.
      *
@@ -228,32 +240,56 @@ public class BattleArena extends Group {
      */
     public void updateEnemyAI(float delta) {
         // Don't update AI if enemy is in a special state
-        if (enemyLutemon.isAttacking() || enemyLutemon.isHurt() || enemyLutemon.isDead() || enemyLutemon.isJumping()) {
+        if (enemyLutemon.isAttacking() || enemyLutemon.isHurt() || enemyLutemon.isDead()) {
             return;
         }
+
+        // Update AI action timer
+        aiActionTimer += delta;
 
         // Simple AI: move towards player if far away, attack if close
         float distance = Math.abs(enemyLutemon.getPosition().x - playerLutemon.getPosition().x);
 
-        if (distance > 200) { // Increased distance threshold to match the increased attack range
-            // Move towards player
-            if (enemyLutemon.getPosition().x > playerLutemon.getPosition().x) {
-                enemyLutemon.moveLeft();
-            } else {
-                enemyLutemon.moveRight();
+        // Make decisions at regular intervals for more consistent behavior
+        if (aiActionTimer >= aiActionInterval) {
+            aiActionTimer = 0;
+
+            // Reset action flags
+            aiWantsToAttack = false;
+            aiWantsToDefend = false;
+
+            // Decide on action based on distance
+            if (distance <= 300) { // Reduced attack threshold for more aggressive AI
+                // Close enough to attack
+                if (Math.random() < 0.7) { // 70% chance to attack when in range
+                    aiWantsToAttack = true;
+                } else if (Math.random() < 0.3) { // 30% chance to defend
+                    aiWantsToDefend = true;
+                }
             }
-        } else {
-            // Stop and attack if close enough
+        }
+
+        // Execute the decided actions
+        if (aiWantsToAttack) {
             enemyLutemon.stopMoving();
-
-            // Attack with some randomness - increased probability for more action
-            if (Math.random() < 0.03) {
-                enemyLutemon.attack();
-            }
-
-            // Defend with some randomness
-            else if (Math.random() < 0.01) {
-                enemyLutemon.jump();
+            enemyLutemon.attack();
+            aiWantsToAttack = false; // Reset after executing
+        } else if (aiWantsToDefend) {
+            enemyLutemon.stopMoving();
+            enemyLutemon.jump();
+            aiWantsToDefend = false; // Reset after executing
+        } else {
+            // Movement logic - approach player if not close enough
+            if (distance > 300) {
+                // Move towards player
+                if (enemyLutemon.getPosition().x > playerLutemon.getPosition().x) {
+                    enemyLutemon.moveLeft();
+                } else {
+                    enemyLutemon.moveRight();
+                }
+            } else {
+                // In attack range but not attacking - stop and wait
+                enemyLutemon.stopMoving();
             }
         }
     }

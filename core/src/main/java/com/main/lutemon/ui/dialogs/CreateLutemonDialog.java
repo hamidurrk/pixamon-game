@@ -42,13 +42,11 @@ public class CreateLutemonDialog extends Window {
         setMovable(false);
         setResizable(false);
 
-        // Set size (75% of screen) - slightly bigger
         float width = Constants.getScreenWidth() * 0.75f;
         float height = Constants.getScreenHeight() * 0.75f;
         setSize(width, height);
         setPosition((Constants.getScreenWidth() - width) / 2, (Constants.getScreenHeight() - height) / 2);
 
-        // Create content
         createContent();
     }
 
@@ -59,7 +57,6 @@ public class CreateLutemonDialog extends Window {
         Table contentTable = new Table();
         contentTable.pad(20);
 
-        // Split into left (preview) and right (input) sides
         Table leftSide = new Table();
         Table rightSide = new Table();
 
@@ -192,7 +189,6 @@ public class CreateLutemonDialog extends Window {
 
         add(contentTable).expand().fill();
 
-        // Initialize preview
         updatePreview();
     }
 
@@ -200,10 +196,8 @@ public class CreateLutemonDialog extends Window {
      * Updates the Lutemon preview based on the selected type.
      */
     private void updatePreview() {
-        // Update avatar
         previewAvatar.setLutemonType(selectedType.toString().toLowerCase());
 
-        // Update stats with smaller text
         StringBuilder statsText = new StringBuilder();
         statsText.append("Type: ").append(selectedType).append("\\n\\n");
         statsText.append("Attack: ").append(selectedType.getAttack()).append("\\n");

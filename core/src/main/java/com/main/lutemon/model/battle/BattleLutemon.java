@@ -29,6 +29,7 @@ public class BattleLutemon {
     private boolean isHurt;
     private boolean isDead;
     private boolean isJumping;
+    private boolean hasDealtDamage; // Flag to track if damage has been dealt for current attack
     private float jumpVelocity;
     private float gravity;
     private float groundLevel;
@@ -38,11 +39,11 @@ public class BattleLutemon {
     private float maxX;
 
     // Constants
-    private static final float MOVE_SPEED = 200f;
-    private static final float JUMP_VELOCITY = 400f;
-    private static final float GRAVITY = 800f;
-    private static final float ATTACK_DURATION = 1.5f; // Increased to allow full animation to play
-    private static final float HURT_DURATION = 1.5f; // Increased to allow full animation to play
+    private static final float MOVE_SPEED = 350f;
+    private static final float JUMP_VELOCITY = 600f;
+    private static final float GRAVITY = 1200f;
+    private static final float ATTACK_DURATION = 0.6f;
+    private static final float HURT_DURATION = 0.4f;
 
     /**
      * Creates a new battle Lutemon.
@@ -64,6 +65,7 @@ public class BattleLutemon {
         this.isHurt = false;
         this.isDead = false;
         this.isJumping = false;
+        this.hasDealtDamage = false;
         this.jumpVelocity = 0;
         this.gravity = GRAVITY;
         this.groundLevel = startY;
@@ -81,36 +83,40 @@ public class BattleLutemon {
     public void update(float delta) {
         stateTime += delta;
 
-        // Handle jumping and gravity
+        // Handle jumping and gravity with improved mechanics
         if (isJumping) {
-            position.y += jumpVelocity * delta;
-            jumpVelocity -= gravity * delta;
+            float jumpBoost = (stateTime < 0.1f) ? 1.2f : 1.0f;
+            position.y += jumpVelocity * delta * jumpBoost;
 
-            // Check if landed
+            // Apply gravity with a stronger effect when falling for better feel
+            float gravityMultiplier = (jumpVelocity < 0) ? 1.3f : 1.0f;
+            jumpVelocity -= gravity * delta * gravityMultiplier;
+
             if (position.y <= groundLevel) {
                 position.y = groundLevel;
                 isJumping = false;
                 jumpVelocity = 0;
+
+                // Return to idle state when landing
+                if (!isAttacking && !isHurt && !isDead) {
+                    setAnimationState(AnimationState.IDLE);
+                }
             }
         }
 
         // Handle movement
         position.x += velocity.x * delta;
 
-        // Enforce arena boundaries
         if (position.x < minX) {
             position.x = minX;
         } else if (position.x > maxX - bounds.width) {
             position.x = maxX - bounds.width;
         }
 
-        // Update collision bounds
         bounds.setPosition(position);
 
-        // Update animation state
         updateAnimationState(delta);
 
-        // Check if dead
         if (!lutemon.isAlive() && animationState != AnimationState.DIE) {
             setAnimationState(AnimationState.DIE);
         }
@@ -138,10 +144,16 @@ public class BattleLutemon {
                 stateTime = 0; // Reset state time when animation state changes
             }
 
+            float damagePoint = ATTACK_DURATION * 0.3f;
+            if (!hasDealtDamage && stateTime >= damagePoint) {
+                // We'll check for hits in BattleArena, just marking the timing here
+                // The actual damage application happens in BattleArena
+            }
+
             // Only end attack animation after the full duration has elapsed
-            // This ensures the complete animation plays
             if (stateTime >= ATTACK_DURATION) {
                 isAttacking = false;
+                hasDealtDamage = false; // Reset damage flag when attack ends
                 setAnimationState(AnimationState.IDLE);
             }
             return; // Don't process other animations while attacking
@@ -227,6 +239,9 @@ public class BattleLutemon {
 
         isJumping = true;
         jumpVelocity = JUMP_VELOCITY;
+
+        stateTime = 0;
+        position.y += 10f;
     }
 
     /**
@@ -238,6 +253,7 @@ public class BattleLutemon {
         if (isAttacking || isHurt || isDead || isJumping) return false;
 
         isAttacking = true;
+        hasDealtDamage = false; // Reset damage flag when starting a new attack
         stateTime = 0; // Reset state time to ensure full attack animation plays
         setAnimationState(AnimationState.ATTACK);
         return true;
@@ -254,14 +270,12 @@ public class BattleLutemon {
         // If already dead, don't take more damage
         if (isDead) return;
 
-        // Store health before damage
         int healthBefore = lutemon.getStats().getCurrentHealth();
         int maxHealth = lutemon.getStats().getMaxHealth();
 
         System.out.println("BattleLutemon taking damage: " + damage +
                          " (Current health: " + healthBefore + "/" + maxHealth + ")");
 
-        // Pass the damage to the underlying Lutemon (which will apply the 20% cap)
         lutemon.takeDamage(damage);
 
         // Store health after damage
@@ -271,19 +285,16 @@ public class BattleLutemon {
         if (healthBefore > healthAfter) {
             isHurt = true;
             setAnimationState(AnimationState.HURT);
-            stateTime = 0; // Reset state time for hurt animation
+            stateTime = 0;
 
-            // Debug output
             System.out.println("BattleLutemon health changed: " + healthBefore + " -> " + healthAfter +
                              " (Damage taken: " + (healthBefore - healthAfter) + ")");
         } else {
             System.out.println("BattleLutemon took no damage!");
         }
 
-        // Check if Lutemon died from the damage
         if (!lutemon.isAlive()) {
             isDead = true;
-            // Death animation will be set after hurt animation finishes
             System.out.println("BattleLutemon died!");
         }
     }
@@ -297,14 +308,18 @@ public class BattleLutemon {
     public boolean attackHits(BattleLutemon other) {
         if (!isAttacking) return false;
 
-        // Create attack hitbox based on direction with increased range
+        float damagePoint = ATTACK_DURATION * 0.3f;
+        if (stateTime < damagePoint || stateTime > ATTACK_DURATION * 0.7f) {
+            return false;
+        }
+
         Rectangle attackBounds = new Rectangle(bounds);
         if (direction == Direction.RIGHT) {
-            attackBounds.x += bounds.width;
-            attackBounds.width = bounds.width * 1.5f; // Increased attack range (1.5x wider)
+            attackBounds.x += bounds.width * 5.0f;
+            attackBounds.width = bounds.width * 8.5f;
         } else {
-            attackBounds.x -= bounds.width * 2f; // Increased attack range
-            attackBounds.width = bounds.width * 2f; // Increased attack range (1.5x wider)
+            attackBounds.x -= bounds.width * 5.0f;
+            attackBounds.width = bounds.width * 8.5f;
         }
 
         return attackBounds.overlaps(other.getBounds());
@@ -332,4 +347,18 @@ public class BattleLutemon {
     public boolean isDead() { return isDead; }
     public boolean isJumping() { return isJumping; }
     public Vector2 getVelocity() { return velocity; }
+
+    /**
+     * Checks if this Lutemon has already dealt damage in the current attack.
+     *
+     * @return True if damage has been dealt, false otherwise
+     */
+    public boolean hasDealtDamage() { return hasDealtDamage; }
+
+    /**
+     * Sets whether this Lutemon has dealt damage in the current attack.
+     *
+     * @param hasDealt True if damage has been dealt, false otherwise
+     */
+    public void setHasDealtDamage(boolean hasDealt) { this.hasDealtDamage = hasDealt; }
 }

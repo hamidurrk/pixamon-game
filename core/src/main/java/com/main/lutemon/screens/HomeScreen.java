@@ -16,10 +16,12 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.main.lutemon.LutemonGame;
 import com.main.lutemon.model.lutemon.*;
+import com.main.lutemon.model.profile.Profile;
 import com.main.lutemon.model.storage.Storage;
 import com.main.lutemon.ui.dialogs.CreateLutemonDialog;
 import com.main.lutemon.ui.fragments.HomeFragment;
 import com.main.lutemon.utils.Constants;
+import com.main.lutemon.utils.ProfileManager;
 
 public class HomeScreen implements Screen {
     private final LutemonGame game;
@@ -57,18 +59,36 @@ public class HomeScreen implements Screen {
         float buttonWidth = Constants.getButtonWidth();
         float buttonHeight = Constants.getScreenHeight() * Constants.BUTTON_HEIGHT_PERCENT;
 
-        // Back button in upper left corner
+        // Top bar with back button and profile info
         Table topTable = new Table();
         topTable.setFillParent(true);
-        topTable.top().left();
+        topTable.top();
+
+        // Back button on the left
+        Table leftTopTable = new Table();
+        leftTopTable.left();
         TextButton backButton = new TextButton("Back", game.getAssetLoader().getSkin());
         backButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                // Save profile before going back to main menu
+                game.saveGame();
                 game.setScreen(new MainMenuScreen(game));
             }
         });
-        topTable.add(backButton).size(buttonWidth * 0.25f, buttonHeight).pad(padding);
+        leftTopTable.add(backButton).size(buttonWidth * 0.25f, buttonHeight).pad(padding);
+
+        // Profile info on the right
+        Table rightTopTable = new Table();
+        rightTopTable.center();
+        Profile currentProfile = ProfileManager.getInstance().getCurrentProfile();
+        if (currentProfile != null) {
+            Label profileLabel = new Label("Profile: " + currentProfile.getName(), game.getAssetLoader().getSkin());
+            rightTopTable.add(profileLabel).pad(150, 0, 0, 0);
+        }
+
+        topTable.add(leftTopTable).expandX().fillX();
+        topTable.add(rightTopTable).expandX().fillX();
 
         TextButton createButton = new TextButton("Create", game.getAssetLoader().getSkin());
         createButton.addListener(new ClickListener() {
@@ -86,7 +106,6 @@ public class HomeScreen implements Screen {
 
         Table fragmentContainer = new Table();
         fragmentContainer.setFillParent(true);
-//        fragmentContainer.setDebug(true);
 
         // Create and position HomeFragment directly
         float fragmentX = Constants.getScreenWidth() * 0.05f;
@@ -105,6 +124,7 @@ public class HomeScreen implements Screen {
 
         TextButton trainButton = new TextButton("Train", game.getAssetLoader().getSkin());
         TextButton battleButton = new TextButton("Battle", game.getAssetLoader().getSkin());
+        TextButton statsButton = new TextButton("Stats", game.getAssetLoader().getSkin());
 
         trainButton.addListener(new ClickListener() {
             @Override
@@ -120,8 +140,16 @@ public class HomeScreen implements Screen {
             }
         });
 
-        bottomTable.add(trainButton).size(buttonWidth, buttonHeight).pad(padding);
-        bottomTable.add(battleButton).size(buttonWidth, buttonHeight).pad(padding);
+        statsButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                game.navigateToStatistics();
+            }
+        });
+
+        bottomTable.add(trainButton).size(buttonWidth * 0.7f, buttonHeight).pad(padding);
+        bottomTable.add(battleButton).size(buttonWidth * 0.7f, buttonHeight).pad(padding);
+        bottomTable.add(statsButton).size(buttonWidth * 0.7f, buttonHeight).pad(padding);
 
         // Add bottom table to main table
         mainTable.add(bottomTable).padBottom(padding * 2).row();
@@ -129,7 +157,6 @@ public class HomeScreen implements Screen {
         // Add all tables to stage
         stage.addActor(topTable);
         stage.addActor(mainTable);
-//        stage.addActor(createButtonContainer);
     }
 
     /**

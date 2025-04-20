@@ -60,12 +60,11 @@ public class BattleCharacter extends Widget {
             // Apply color tint based on state
             Color originalColor = batch.getColor().cpy();
             if (battleLutemon.isHurt()) {
-                batch.setColor(1.0f, 0.5f, 0.5f, 1.0f); // Reddish tint when hurt
+                batch.setColor(1.0f, 0.5f, 0.5f, 1.0f);
             }
 
             // Draw the character with proper flipping
             if (flipX) {
-                // When flipping, we need to adjust the position to maintain the same visual position
                 batch.draw(
                     currentFrame,
                     getX() + textureWidth * scale, getY(),
@@ -85,7 +84,6 @@ public class BattleCharacter extends Widget {
                 );
             }
 
-            // Reset color
             batch.setColor(originalColor);
         } else {
             Gdx.app.error("BattleCharacter",

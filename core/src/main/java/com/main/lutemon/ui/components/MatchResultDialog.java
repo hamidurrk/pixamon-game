@@ -10,7 +10,9 @@ import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.main.lutemon.model.lutemon.Lutemon;
+import com.main.lutemon.model.storage.Storage;
 import com.main.lutemon.screens.BattleScreen;
+import com.main.lutemon.utils.StatisticsManager;
 
 /**
  * Dialog to display the match result and provide options to restart or quit.
@@ -32,7 +34,7 @@ public class MatchResultDialog extends Window {
      */
     public MatchResultDialog(BattleScreen battleScreen, Lutemon playerLutemon, Lutemon opponentLutemon,
                             boolean playerWon, Skin skin) {
-        super(playerWon ? "Victory!" : "Defeat!", skin);
+        super("", skin);
         this.battleScreen = battleScreen;
         this.playerLutemon = playerLutemon;
         this.opponentLutemon = opponentLutemon;
@@ -71,7 +73,7 @@ public class MatchResultDialog extends Window {
         Label resultLabel = new Label(resultMessage, skin);
         resultLabel.setWrap(true);
         resultLabel.setAlignment(Align.center);
-        resultLabel.setFontScale(1.5f); // Larger font for better visibility
+        resultLabel.setFontScale(1.5f);
 
         // Stats message
         String statsMessage = playerWon
@@ -81,7 +83,7 @@ public class MatchResultDialog extends Window {
         Label statsLabel = new Label(statsMessage, skin);
         statsLabel.setWrap(true);
         statsLabel.setAlignment(Align.center);
-        statsLabel.setFontScale(1.3f); // Larger font for better visibility
+        statsLabel.setFontScale(1.3f);
 
         // Buttons with larger text
         TextButton restartButton = new TextButton("Restart Match", skin);
@@ -95,6 +97,11 @@ public class MatchResultDialog extends Window {
         restartButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                // Record battle statistics for both Lutemons
+                recordBattleStatistics();
+
+                // Make sure the player's Lutemon is in the BATTLE location
+                Storage.getInstance().moveToLocation(playerLutemon.getId(), Storage.Location.BATTLE);
                 battleScreen.restartBattle(playerLutemon, opponentLutemon);
                 remove(); // Remove dialog
             }
@@ -103,13 +110,16 @@ public class MatchResultDialog extends Window {
         quitButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                // Record battle statistics for both Lutemons
+                recordBattleStatistics();
+
+                // Move the player's Lutemon back to HOME location before navigating to home
+                Storage.getInstance().moveToLocation(playerLutemon.getId(), Storage.Location.HOME);
                 battleScreen.getGame().navigateToHome();
                 remove(); // Remove dialog
             }
         });
 
-        // Add to content table
-        // Make content scale with dialog size
         float contentWidth = getWidth() * 0.8f;
         float buttonWidth = getWidth() * 0.8f;
         float buttonHeight = getHeight() * 0.15f;
@@ -120,6 +130,34 @@ public class MatchResultDialog extends Window {
         contentTable.add(quitButton).width(buttonWidth).height(buttonHeight).pad(20);
 
         add(contentTable).expand().fill();
+    }
+
+    /**
+     * Records battle statistics for both Lutemons.
+     * This method ensures that both Lutemons have their battle count incremented,
+     * and the winner has their win count incremented.
+     */
+    private void recordBattleStatistics() {
+        // Record battle for player Lutemon
+        playerLutemon.getStats().incrementBattles();
+        if (playerWon) {
+            playerLutemon.getStats().incrementWins();
+            playerLutemon.getStats().incrementExperience(); // Bonus experience for winning
+            System.out.println("Player " + playerLutemon.getName() + " gained 1 experience point for winning");
+        }
+
+        // Record battle for opponent Lutemon (if it's in storage)
+        if (Storage.getInstance().getLutemon(opponentLutemon.getId()) != null) {
+            opponentLutemon.getStats().incrementBattles();
+            if (!playerWon) {
+                opponentLutemon.getStats().incrementWins();
+                opponentLutemon.getStats().incrementExperience(); // Bonus experience for winning
+                System.out.println("Opponent " + opponentLutemon.getName() + " gained 1 experience point for winning");
+            }
+        }
+
+        // Save the game to persist statistics
+        battleScreen.getGame().saveGame();
     }
 
     /**

@@ -31,7 +31,7 @@ public class HealthBar extends Actor {
         this.healthPercentage = 1.0f;
         this.currentHealth = 100;
         this.maxHealth = 100;
-        
+
         if (lutemon != null) {
             this.currentHealth = lutemon.getStats().getCurrentHealth();
             this.maxHealth = lutemon.getStats().getMaxHealth();
@@ -64,33 +64,25 @@ public class HealthBar extends Actor {
     public void draw(Batch batch, float parentAlpha) {
         // End the batch to draw with ShapeRenderer
         batch.end();
-        
+
         Gdx.gl.glEnable(Gdx.gl.GL_BLEND);
-        
+
         // Draw background
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         shapeRenderer.setColor(Color.DARK_GRAY);
         shapeRenderer.rect(bounds.x, bounds.y, bounds.width, bounds.height);
         shapeRenderer.end();
-        
+
         // Draw health bar
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         shapeRenderer.setColor(getHealthColor(healthPercentage));
         shapeRenderer.rect(bounds.x, bounds.y, bounds.width * healthPercentage, bounds.height);
         shapeRenderer.end();
-        
+
         Gdx.gl.glDisable(Gdx.gl.GL_BLEND);
-        
-        // Restart the batch for drawing text
+
         batch.begin();
-        
-        // Draw health text
-        font.setColor(Color.WHITE);
-        String healthText = currentHealth + "/" + maxHealth;
-        // Calculate text position without using glyph width
-        float textX = bounds.x + 10;
-        float textY = bounds.y + bounds.height - 5;
-        font.draw(batch, healthText, textX, textY);
+
     }
 
     private Color getHealthColor(float percentage) {
@@ -113,7 +105,7 @@ public class HealthBar extends Actor {
         shapeRenderer.dispose();
         font.dispose();
     }
-    
+
     public void setLutemon(Lutemon lutemon) {
         this.lutemon = lutemon;
         if (lutemon != null) {
@@ -122,4 +114,4 @@ public class HealthBar extends Actor {
             updateHealthPercentage();
         }
     }
-} 
+}

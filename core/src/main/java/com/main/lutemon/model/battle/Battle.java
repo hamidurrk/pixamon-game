@@ -1,6 +1,7 @@
 package com.main.lutemon.model.battle;
 
 import com.main.lutemon.model.lutemon.Lutemon;
+import com.main.lutemon.utils.StatisticsManager;
 import java.util.Random;
 
 /**
@@ -98,7 +99,6 @@ public class Battle {
      * Performs an AI turn.
      */
     private void performAITurn() {
-        // Simple AI: Randomly choose between attack and defend
         if (random.nextBoolean()) {
             performAttack(enemyLutemon, playerLutemon);
         } else {
@@ -118,18 +118,10 @@ public class Battle {
         int randomVariation = random.nextInt(3) - 1; // -1, 0, or 1
         int damage = Math.max(1, attackValue + randomVariation); // Ensure at least 1 damage
 
-        // Debug output
-        System.out.println("\n--- BATTLE ATTACK ---");
-        System.out.println("Battle: Attack with damage: " + damage +
-                         " (Attack: " + attackValue + ", Variation: " + randomVariation + ")");
 
-        // Apply damage (defense and 20% cap are handled in the takeDamage method)
         defender.takeDamage(damage);
 
-        // Record battle stats if this is a finishing blow
         if (!defender.isAlive()) {
-            attacker.recordBattle(true);
-            defender.recordBattle(false);
             state = BattleState.FINISHED;
             System.out.println("Battle: Defender died!");
         }
@@ -141,7 +133,6 @@ public class Battle {
      * @param defender The defending Lutemon
      */
     private void performDefend(Lutemon defender) {
-        // Temporary defense boost
         defender.getStats().setDefense(defender.getStats().getDefense() + 2);
     }
 
@@ -152,25 +143,14 @@ public class Battle {
      * @param defender The defending Lutemon
      */
     private void performSpecial(Lutemon attacker, Lutemon defender) {
-        // Special attack with higher damage but lower accuracy
         if (random.nextFloat() < 0.7f) {
-            // For special attacks, use attack value + 2 (with small random variation)
             int attackValue = attacker.getStats().getAttack();
             int randomVariation = random.nextInt(3) - 1; // -1, 0, or 1
             int damage = Math.max(1, attackValue + 2 + randomVariation); // Special attack bonus + variation
 
-            // Debug output
-            System.out.println("\n--- BATTLE SPECIAL ATTACK ---");
-            System.out.println("Battle: Special attack with damage: " + damage +
-                             " (Attack: " + attackValue + ", Bonus: 2, Variation: " + randomVariation + ")");
-
-            // Apply damage (defense and 20% cap are handled in the takeDamage method)
             defender.takeDamage(damage);
 
-            // Check if this was a finishing blow
             if (!defender.isAlive()) {
-                attacker.recordBattle(true);
-                defender.recordBattle(false);
                 state = BattleState.FINISHED;
                 System.out.println("Battle: Defender died from special attack!");
             }
@@ -184,6 +164,7 @@ public class Battle {
      */
     public void start() {
         state = BattleState.IN_PROGRESS;
+        StatisticsManager.getInstance().incrementTotalBattles();
     }
 
     // Getters and setters
