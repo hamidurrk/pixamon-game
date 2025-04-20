@@ -113,9 +113,11 @@ public class Battle {
      * @param defender The defending Lutemon
      */
     private void performAttack(Lutemon attacker, Lutemon defender) {
-        // Add some randomness to damage
-        float randomFactor = 0.8f + random.nextFloat() * 0.4f;
-        int damage = (int) (attacker.getAttackDamage() * randomFactor);
+        // Simple randomness: attack value plus or minus 1
+        int attackValue = attacker.getStats().getAttack();
+        int randomVariation = random.nextInt(3) - 1; // -1, 0, or 1
+        int damage = Math.max(1, attackValue + randomVariation); // Ensure at least 1 damage
+
         defender.takeDamage(damage);
 
         // Record battle stats if this is a finishing blow
@@ -145,7 +147,11 @@ public class Battle {
     private void performSpecial(Lutemon attacker, Lutemon defender) {
         // Special attack with higher damage but lower accuracy
         if (random.nextFloat() < 0.7f) {
-            int damage = (int) (attacker.getAttackDamage() * 1.5f);
+            // For special attacks, use attack value + 2 (with small random variation)
+            int attackValue = attacker.getStats().getAttack();
+            int randomVariation = random.nextInt(3) - 1; // -1, 0, or 1
+            int damage = Math.max(1, attackValue + 2 + randomVariation); // Special attack bonus + variation
+
             defender.takeDamage(damage);
 
             // Check if this was a finishing blow

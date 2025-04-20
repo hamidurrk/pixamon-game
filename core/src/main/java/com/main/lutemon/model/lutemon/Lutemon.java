@@ -24,7 +24,7 @@ public abstract class Lutemon {
         this.isAlive = true;
         this.stateTime = 0;
         this.animationSpeed = 0.1f;
-        
+
         // Initialize stats based on type
         initializeStats();
     }
@@ -44,6 +44,9 @@ public abstract class Lutemon {
         }
     }
 
+    /**
+     * Heals the Lutemon to full health.
+     */
     public void heal() {
         stats.setCurrentHealth(stats.getMaxHealth());
         isAlive = true;
@@ -52,6 +55,18 @@ public abstract class Lutemon {
     public void train() {
         stats.incrementExperience();
         stats.incrementTrainingDays();
+    }
+
+    /**
+     * Adds experience points to the Lutemon.
+     * This directly increases the Lutemon's stats through the LutemonStats class.
+     *
+     * @param amount The amount of experience points to add
+     */
+    public void addExperience(int amount) {
+        for (int i = 0; i < amount; i++) {
+            stats.incrementExperience();
+        }
     }
 
     public void recordBattle(boolean won) {
@@ -79,11 +94,11 @@ public abstract class Lutemon {
     public float getStateTime() { return stateTime; }
     public float getAnimationSpeed() { return animationSpeed; }
     public void setAnimationSpeed(float speed) { this.animationSpeed = speed; }
-    
+
     // Additional getters for stats
     public int getLevel() { return stats.getLevel(); }
     public int getExperience() { return stats.getExperience(); }
     public int getWins() { return stats.getWins(); }
     public int getLosses() { return stats.getLosses(); }
     public int getAttack() { return stats.getAttack(); }
-} 
+}

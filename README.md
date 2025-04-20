@@ -1,5 +1,9 @@
 # Lutemon - A Retro-Style Pixel Art Game
 
+Every 5 EXP points = +1 Max Health
+Every 10 EXP points = +1 Attack
+Every 15 EXP points = +1 Defense
+
 A [libGDX](https://libgdx.com/) project generated with [gdx-liftoff](https://github.com/libgdx/gdx-liftoff).
 
 This project was generated with a template including simple application launchers and an `ApplicationAdapter` extension that draws libGDX logo. After the initial installation, `core` and `android` has been programmed accordingly.

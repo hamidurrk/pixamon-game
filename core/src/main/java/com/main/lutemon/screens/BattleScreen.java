@@ -21,6 +21,7 @@ import com.main.lutemon.model.battle.Battle;
 import com.main.lutemon.model.battle.BattleState;
 import com.main.lutemon.model.lutemon.Lutemon;
 import com.main.lutemon.model.storage.Storage;
+import com.main.lutemon.ui.components.AnimatedAvatar;
 import com.main.lutemon.ui.components.BattleArena;
 import com.main.lutemon.ui.components.MatchResultDialog;
 import com.main.lutemon.ui.fragments.BattleFragment;
@@ -268,8 +269,10 @@ public class BattleScreen implements Screen {
         // Clear existing content except title
         selectionTable.clear();
 
-        Label titleLabel = new Label("Select Your Lutemon", game.getAssetLoader().getSkin(), "title");
-        selectionTable.add(titleLabel).colspan(2).pad(20).row();
+        // Set appropriate title based on whether player Lutemon is already selected
+        String titleText = (selectedPlayerLutemon == null) ? "Select Your Lutemon" : "Select Enemy Lutemon";
+        Label titleLabel = new Label(titleText, game.getAssetLoader().getSkin(), "title");
+        selectionTable.add(titleLabel).colspan(3).pad(20).row(); // Increased colspan to 3
 
         // Get Lutemons from storage
         List<Lutemon> lutemons = Storage.getInstance().getAllLutemons();
@@ -277,7 +280,7 @@ public class BattleScreen implements Screen {
         if (lutemons.isEmpty()) {
             Label noLutemonsLabel = new Label("No Lutemons available. Create some first!",
                                            game.getAssetLoader().getSkin());
-            selectionTable.add(noLutemonsLabel).colspan(2).pad(20).row();
+            selectionTable.add(noLutemonsLabel).colspan(3).pad(20).row(); // Increased colspan to 3
 
             TextButton backButton = new TextButton("Back to Home", game.getAssetLoader().getSkin());
             backButton.addListener(new ClickListener() {
@@ -287,14 +290,20 @@ public class BattleScreen implements Screen {
                 }
             });
 
-            selectionTable.add(backButton).colspan(2).pad(20);
+            selectionTable.add(backButton).colspan(3).pad(20); // Increased colspan to 3
             return;
         }
 
         // Create scrollable container
         Table lutemonTable = new Table();
+        lutemonTable.top();
+
+        // Create a scroll pane with proper settings
         ScrollPane scrollPane = new ScrollPane(lutemonTable, game.getAssetLoader().getSkin());
         scrollPane.setFadeScrollBars(false);
+        scrollPane.setScrollingDisabled(true, false); // Only allow vertical scrolling
+        scrollPane.setForceScroll(false, true); // Force vertical scrolling
+        scrollPane.setOverscroll(false, false); // Disable overscroll
 
         // Add Lutemons to table
         for (Lutemon lutemon : lutemons) {
@@ -302,23 +311,59 @@ public class BattleScreen implements Screen {
                 continue; // Skip already selected Lutemon
             }
 
-            Table lutemonRow = new Table();
-            lutemonRow.pad(10);
+            // Create a container for each Lutemon with proper spacing - increased width
+            Table lutemonContainer = new Table();
+            lutemonContainer.setBackground(game.getAssetLoader().getSkin().getDrawable("default-pane"));
+            lutemonContainer.pad(20);
 
-            // Lutemon name and type
+            // Create a row for avatar and info
+            Table lutemonRow = new Table();
+
+            // Add animated avatar on the left - increased size by 3x
+            AnimatedAvatar avatar = new AnimatedAvatar(lutemon.getType().toString(), 360); // 120 * 3 = 360
+            lutemonRow.add(avatar).size(360).padRight(25);
+
+            // Create info table for name, type, and stats
+            Table infoTable = new Table();
+            infoTable.align(Align.left);
+
+            // Lutemon name with larger font
             Label nameLabel = new Label(lutemon.getName(), game.getAssetLoader().getSkin());
+            nameLabel.setFontScale(1.2f);
+
+            // Lutemon type with color
             Label typeLabel = new Label(lutemon.getType().toString(), game.getAssetLoader().getSkin());
+
+            // Set color based on type
+            switch (lutemon.getType()) {
+                case WHITE:
+                    typeLabel.setColor(0.9f, 0.9f, 0.9f, 1);
+                    break;
+                case GREEN:
+                    typeLabel.setColor(0.2f, 0.8f, 0.2f, 1);
+                    break;
+                case PINK:
+                    typeLabel.setColor(0.9f, 0.5f, 0.8f, 1);
+                    break;
+                case ORANGE:
+                    typeLabel.setColor(1.0f, 0.6f, 0.2f, 1);
+                    break;
+                case BLACK:
+                    typeLabel.setColor(0.0f, 0.0f, 0.0f, 1); // True black color
+                    break;
+            }
 
             // Lutemon stats
             Label statsLabel = new Label(
-                "HP: " + lutemon.getStats().getCurrentHealth() + "/" + lutemon.getStats().getMaxHealth() +
-                "  ATK: " + lutemon.getStats().getAttack() +
-                "  DEF: " + lutemon.getStats().getDefense(),
+                "HP: " + lutemon.getStats().getCurrentHealth() + "/" + lutemon.getStats().getMaxHealth() + "\n" +
+                "ATK: " + lutemon.getStats().getAttack() + "\n" +
+                "DEF: " + lutemon.getStats().getDefense(),
                 game.getAssetLoader().getSkin()
             );
 
-            // Select button
+            // Create select button - larger size
             TextButton selectButton = new TextButton("Select", game.getAssetLoader().getSkin());
+            selectButton.getLabel().setFontScale(1f);
             final Lutemon finalLutemon = lutemon;
             selectButton.addListener(new ClickListener() {
                 @Override
@@ -327,18 +372,38 @@ public class BattleScreen implements Screen {
                 }
             });
 
-            lutemonRow.add(nameLabel).width(150).pad(5);
-            lutemonRow.add(typeLabel).width(100).pad(5);
-            lutemonRow.add(statsLabel).width(300).pad(5);
-            lutemonRow.add(selectButton).width(100).pad(5);
+            // Create a horizontal layout for stats and button
+            Table statsAndButtonTable = new Table();
 
-            lutemonTable.add(lutemonRow).expandX().fillX().row();
+            // Add info to the info table with proper spacing
+            infoTable.add(nameLabel).left().padBottom(10).row();
+            infoTable.add(typeLabel).left().padBottom(15).row();
+
+            // Add info table to the row
+            lutemonRow.add(infoTable).expandX().fillX().left();
+
+            // Add the row to the container
+            lutemonContainer.add(lutemonRow).expandX().fillX().row();
+
+            // Add stats to the left of the stats and button table
+            statsAndButtonTable.add(statsLabel).left().expandX();
+
+            // Add select button to the right of the stats
+            statsAndButtonTable.add(selectButton).width(300).height(80).padLeft(20).right();
+
+            // Add the stats and button table to the container
+            lutemonContainer.add(statsAndButtonTable).expandX().fillX().padTop(15);
+
+            // Add the container to the table with spacing - increased width
+            lutemonTable.add(lutemonContainer).width(1200).pad(15).row();
         }
 
-        selectionTable.add(scrollPane).colspan(2).expand().fill().pad(20).row();
+        // Add the scroll pane to the selection table
+        selectionTable.add(scrollPane).colspan(3).expand().fill().pad(20).row(); // Increased colspan to 3
 
-        // Back button
+        // Back button - increased size
         TextButton backButton = new TextButton("Back to Home", game.getAssetLoader().getSkin());
+        backButton.getLabel().setFontScale(1f);
         backButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -346,7 +411,7 @@ public class BattleScreen implements Screen {
             }
         });
 
-        selectionTable.add(backButton).colspan(2).pad(20);
+        selectionTable.add(backButton).colspan(3).width(800).height(80).pad(25); // Increased size
     }
 
     /**
@@ -359,12 +424,7 @@ public class BattleScreen implements Screen {
             // First selection (player's Lutemon)
             selectedPlayerLutemon = lutemon;
 
-            // Update selection UI title
-            selectionTable.clear();
-            Label titleLabel = new Label("Select Opponent Lutemon", game.getAssetLoader().getSkin(), "title");
-            selectionTable.add(titleLabel).colspan(2).pad(20).row();
-
-            // Update selection list
+            // Update selection list with new title
             updateSelectionUI();
         } else {
             // Second selection (opponent's Lutemon)

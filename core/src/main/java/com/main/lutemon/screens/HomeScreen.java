@@ -17,6 +17,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.main.lutemon.LutemonGame;
 import com.main.lutemon.model.lutemon.*;
 import com.main.lutemon.model.storage.Storage;
+import com.main.lutemon.ui.dialogs.CreateLutemonDialog;
 import com.main.lutemon.ui.fragments.HomeFragment;
 import com.main.lutemon.utils.Constants;
 
@@ -131,32 +132,20 @@ public class HomeScreen implements Screen {
 //        stage.addActor(createButtonContainer);
     }
 
+    /**
+     * Shows the dialog for creating a new Lutemon.
+     */
     public void showCreateLutemonDialog() {
-        Dialog dialog = new Dialog("Create New Lutemon", game.getAssetLoader().getSkin());
-        TextField nameField = new TextField("", game.getAssetLoader().getSkin());
-        dialog.getContentTable().add("Choose a name for your new Lutemon:").row();
-        dialog.getContentTable().add(nameField).pad(10);
-
-        dialog.button("Create", true);
-        dialog.button("Cancel", false);
-
-//        dialog.setResult(result -> {
-//            if ((Boolean)result) {
-//                String name = nameField.getText().trim();
-//                if (!name.isEmpty()) {
-//                    createLutemon(name);
-//                }
-//            }
-//        });
-
+        CreateLutemonDialog dialog = new CreateLutemonDialog(this, game.getAssetLoader().getSkin());
         dialog.show(stage);
     }
 
-    private void createLutemon(String name) {
-        Lutemon lutemon = new WhiteLutemon(0, name);
-        Storage.getInstance().addLutemon(lutemon);
+    /**
+     * Updates the Lutemon list in the home fragment.
+     * Called after a new Lutemon is created.
+     */
+    public void updateLutemonList() {
         homeFragment.updateLutemonList();
-        game.saveGame();
     }
 
     @Override

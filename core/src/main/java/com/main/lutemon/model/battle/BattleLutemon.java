@@ -41,8 +41,8 @@ public class BattleLutemon {
     private static final float MOVE_SPEED = 200f;
     private static final float JUMP_VELOCITY = 400f;
     private static final float GRAVITY = 800f;
-    private static final float ATTACK_DURATION = 0.4f; // Shorter attack duration for better responsiveness
-    private static final float HURT_DURATION = 0.3f;
+    private static final float ATTACK_DURATION = 1.5f; // Increased to allow full animation to play
+    private static final float HURT_DURATION = 1.5f; // Increased to allow full animation to play
 
     /**
      * Creates a new battle Lutemon.
@@ -135,8 +135,11 @@ public class BattleLutemon {
             // Make sure we're in ATTACK animation state
             if (animationState != AnimationState.ATTACK) {
                 setAnimationState(AnimationState.ATTACK);
+                stateTime = 0; // Reset state time when animation state changes
             }
 
+            // Only end attack animation after the full duration has elapsed
+            // This ensures the complete animation plays
             if (stateTime >= ATTACK_DURATION) {
                 isAttacking = false;
                 setAnimationState(AnimationState.IDLE);
@@ -273,8 +276,8 @@ public class BattleLutemon {
             attackBounds.x += bounds.width;
             attackBounds.width = bounds.width * 1.5f; // Increased attack range (1.5x wider)
         } else {
-            attackBounds.x -= bounds.width * 1.5f; // Increased attack range
-            attackBounds.width = bounds.width * 1.5f; // Increased attack range (1.5x wider)
+            attackBounds.x -= bounds.width * 2f; // Increased attack range
+            attackBounds.width = bounds.width * 2f; // Increased attack range (1.5x wider)
         }
 
         return attackBounds.overlaps(other.getBounds());

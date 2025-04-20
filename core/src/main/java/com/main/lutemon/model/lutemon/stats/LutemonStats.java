@@ -32,24 +32,46 @@ public class LutemonStats {
         this.currentHealth = maxHealth;
     }
 
+    /**
+     * Gets the effective attack value including experience bonuses.
+     * For every 10 experience points, attack increases by 1.
+     *
+     * @return The effective attack value
+     */
     public int getEffectiveAttack() {
         return attack + (experience / 10);
     }
 
-    public void incrementExperience() {
-        experience += 10;
-        if (experience >= level * 100) {
-            levelUp();
-        }
+    /**
+     * Gets the effective defense value including experience bonuses.
+     * For every 15 experience points, defense increases by 1.
+     *
+     * @return The effective defense value
+     */
+    public int getEffectiveDefense() {
+        return defense + (experience / 15);
     }
 
-    private void levelUp() {
-        level++;
-        maxHealth += 10;
-        currentHealth = maxHealth;
-        attack += 2;
-        defense += 1;
-        experience = 0;
+    /**
+     * Gets the effective max health including experience bonuses.
+     * For every 5 experience points, max health increases by 1.
+     *
+     * @return The effective max health value
+     */
+    public int getEffectiveMaxHealth() {
+        return maxHealth + (experience / 5);
+    }
+
+    /**
+     * Increments the experience points by 10.
+     * Experience directly affects stats through the getEffective* methods.
+     */
+    public void incrementExperience() {
+        experience += 1;
+        // Update current health if it was at max before
+        if (currentHealth == maxHealth || currentHealth == getEffectiveMaxHealth()) {
+            currentHealth = getEffectiveMaxHealth();
+        }
     }
 
     public void incrementTrainingDays() {
@@ -69,13 +91,13 @@ public class LutemonStats {
     }
 
     // Getters and setters
-    public int getMaxHealth() { return maxHealth; }
+    public int getMaxHealth() { return getEffectiveMaxHealth(); }
     public void setMaxHealth(int maxHealth) { this.maxHealth = maxHealth; }
     public int getCurrentHealth() { return currentHealth; }
     public void setCurrentHealth(int currentHealth) { this.currentHealth = currentHealth; }
-    public int getAttack() { return attack; }
+    public int getAttack() { return getEffectiveAttack(); }
     public void setAttack(int attack) { this.attack = attack; }
-    public int getDefense() { return defense; }
+    public int getDefense() { return getEffectiveDefense(); }
     public void setDefense(int defense) { this.defense = defense; }
     public int getExperience() { return experience; }
     public void setExperience(int experience) { this.experience = experience; }
@@ -89,4 +111,4 @@ public class LutemonStats {
     public void setWins(int wins) { this.wins = wins; }
     public int getLosses() { return losses; }
     public void setLosses(int losses) { this.losses = losses; }
-} 
+}

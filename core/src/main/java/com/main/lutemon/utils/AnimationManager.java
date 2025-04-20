@@ -19,6 +19,11 @@ public class AnimationManager {
     private final HashMap<String, Animation.PlayMode> defaultPlayModes;
     private float stateTime;
 
+    /**
+     * List of Lutemon types that need to be flipped horizontally (originally facing left)
+     */
+    private final String[] typesToFlip = {"white", "orange", "black"};
+
     private AnimationManager() {
         this.animations = new ObjectMap<>();
         this.defaultPlayModes = new HashMap<>();
@@ -39,7 +44,7 @@ public class AnimationManager {
         defaultPlayModes.put("idle", Animation.PlayMode.LOOP);
         defaultPlayModes.put("run", Animation.PlayMode.LOOP);
 
-        // Non-looping animations
+        // Non-looping animations - using NORMAL ensures they play once and stop
         defaultPlayModes.put("attack", Animation.PlayMode.NORMAL);
         defaultPlayModes.put("hurt", Animation.PlayMode.NORMAL);
         defaultPlayModes.put("die", Animation.PlayMode.NORMAL);
@@ -52,6 +57,21 @@ public class AnimationManager {
         return instance;
     }
 
+    /**
+     * Checks if a Lutemon type needs to be flipped horizontally
+     *
+     * @param typeName The Lutemon type name
+     * @return True if the type needs to be flipped, false otherwise
+     */
+    private boolean shouldFlipType(String typeName) {
+        for (String type : typesToFlip) {
+            if (typeName.equalsIgnoreCase(type)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void loadAnimations() {
         // 1) read the JSON manifest
         FileHandle jsonFile = Gdx.files.internal("lutemons/animations.json");
@@ -60,6 +80,7 @@ public class AnimationManager {
         // 2) for each lutemon type ("white", "green", etc.)
         for (JsonValue typeNode : root) {
             String type = typeNode.name();
+            boolean shouldFlip = shouldFlipType(type);
 
             // 3) for each animation under that type ("idle", "walk", etc.)
             for (JsonValue animNode : typeNode) {
@@ -78,12 +99,19 @@ public class AnimationManager {
 
                     TextureRegion[][] tmp = TextureRegion.split(sheet, frameWidth, frameHeight);
 
-                    // flatten in row-major order
+                    // flatten in row-major order and flip if needed
                     TextureRegion[] frames = new TextureRegion[cols * rows];
                     int idx = 0;
                     for (int r = 0; r < rows; r++) {
                         for (int c = 0; c < cols; c++) {
-                            frames[idx++] = tmp[r][c];
+                            frames[idx] = tmp[r][c];
+
+                            // Flip the texture horizontally if this type needs flipping
+                            if (shouldFlip) {
+                                frames[idx].flip(true, false);
+                            }
+
+                            idx++;
                         }
                     }
 
@@ -155,7 +183,7 @@ public class AnimationManager {
     }
 
     /**
-     * Checks if an animation has finished playing.
+     * Checks if an animation has finished playing using the global state time.
      *
      * @param lutemonType The type of Lutemon
      * @param animationType The type of animation
@@ -165,6 +193,36 @@ public class AnimationManager {
         String key = lutemonType.toLowerCase() + "_" + animationType;
         Animation<TextureRegion> animation = animations.get(key);
         return animation != null && animation.isAnimationFinished(stateTime);
+    }
+
+    /**
+     * Checks if an animation has finished playing using a specific state time.
+     *
+     * @param lutemonType The type of Lutemon
+     * @param animationType The type of animation
+     * @param specificStateTime The specific state time to check against
+     * @return True if the animation has finished, false otherwise
+     */
+    public boolean isAnimationFinished(String lutemonType, String animationType, float specificStateTime) {
+        String key = lutemonType.toLowerCase() + "_" + animationType;
+        Animation<TextureRegion> animation = animations.get(key);
+        return animation != null && animation.isAnimationFinished(specificStateTime);
+    }
+
+    /**
+     * Gets the duration of an animation in seconds.
+     *
+     * @param lutemonType The type of Lutemon
+     * @param animationType The type of animation
+     * @return The duration of the animation in seconds, or 0 if not found
+     */
+    public float getAnimationDuration(String lutemonType, String animationType) {
+        String key = lutemonType.toLowerCase() + "_" + animationType;
+        Animation<TextureRegion> animation = animations.get(key);
+        if (animation == null) return 0;
+
+        // Calculate total duration based on frame count and frame duration
+        return animation.getKeyFrames().length * animation.getFrameDuration();
     }
 
     public void dispose() {

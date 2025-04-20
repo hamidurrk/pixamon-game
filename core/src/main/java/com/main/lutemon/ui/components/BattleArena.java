@@ -110,7 +110,15 @@ public class BattleArena extends Group {
         if (battle.getState() == BattleState.IN_PROGRESS) {
             // Check for attacks
             if (playerLutemon.isAttacking() && playerLutemon.attackHits(enemyLutemon)) {
-                enemyLutemon.takeDamage(playerLutemon.getLutemon().getAttackDamage());
+                // Get attack value from player Lutemon
+                int attackValue = playerLutemon.getLutemon().getStats().getAttack();
+
+                // Add simple randomness: attack value plus or minus 1
+                int randomVariation = (int)(Math.random() * 3) - 1; // -1, 0, or 1
+                int damage = Math.max(1, attackValue + randomVariation); // Ensure at least 1 damage
+
+                // Apply damage to enemy Lutemon (defense is handled in the takeDamage method)
+                enemyLutemon.takeDamage(damage);
 
                 // Check if enemy died
                 if (!enemyLutemon.getLutemon().isAlive()) {
@@ -120,7 +128,15 @@ public class BattleArena extends Group {
             }
 
             if (enemyLutemon.isAttacking() && enemyLutemon.attackHits(playerLutemon)) {
-                playerLutemon.takeDamage(enemyLutemon.getLutemon().getAttackDamage());
+                // Get attack value from enemy Lutemon
+                int attackValue = enemyLutemon.getLutemon().getStats().getAttack();
+
+                // Add simple randomness: attack value plus or minus 1
+                int randomVariation = (int)(Math.random() * 3) - 1; // -1, 0, or 1
+                int damage = Math.max(1, attackValue + randomVariation); // Ensure at least 1 damage
+
+                // Apply damage to player Lutemon (defense is handled in the takeDamage method)
+                playerLutemon.takeDamage(damage);
 
                 // Check if player died
                 if (!playerLutemon.getLutemon().isAlive()) {

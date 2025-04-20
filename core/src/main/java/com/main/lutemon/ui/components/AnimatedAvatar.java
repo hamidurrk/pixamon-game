@@ -7,13 +7,22 @@ import com.badlogic.gdx.scenes.scene2d.ui.Widget;
 import com.main.lutemon.utils.AnimationManager;
 
 public class AnimatedAvatar extends Widget {
-    private final String lutemonType;
+    private String lutemonType;
     private final AnimationManager animationManager;
 
     public AnimatedAvatar(String lutemonType, float size) {
         this.lutemonType = lutemonType.toLowerCase();
         this.animationManager = AnimationManager.getInstance();
         setSize(size, size);
+    }
+
+    /**
+     * Sets the Lutemon type for this avatar.
+     *
+     * @param lutemonType The new Lutemon type
+     */
+    public void setLutemonType(String lutemonType) {
+        this.lutemonType = lutemonType.toLowerCase();
     }
 
     @Override
