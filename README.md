@@ -47,6 +47,23 @@ The game includes several key features that enhance the gameplay experience:
 - **Dynamic Scaling**: UI elements scale based on screen size for consistent appearance.
 - **Theming**: Skins and fonts are customizable through asset files.
 
+## Object-Oriented Design Overview
+The game is designed using object-oriented principles, with a focus on `SOLID principles`, `encapsulation`, `inheritance`, and `polymorphism`. Key classes include:
+- **Lutemon**: Base class for all Lutemons, containing properties like health, attack, and defense.
+- **BattleLutemon**: Inherits from Lutemon and adds battle-specific properties and methods.
+- **TrainingLutemon**: Inherits from Lutemon and adds training-specific properties and methods.
+- **AnimationManager**: Manages all animations for Lutemons, including loading and playing animations.
+- **AssetLoader**: Loads and manages game assets, including textures, fonts, and UI skins.
+- **SaveManager**: Handles saving and loading game state to and from JSON files.
+- **ProfileManager**: Manages multiple player profiles and their associated game states.
+- **StatisticsManager**: Tracks game statistics and metrics.
+- **UI Components**: Custom UI components for displaying health bars, dialogs, and animated avatars.
+- **Screen Management**: Each game screen is implemented as a separate class, allowing for modular and maintainable code.
+- **Constants**: Centralized class for game parameters, making it easier to manage and adjust settings.
+
+### UML Class Diagram
+![![Lutemon Game](media/final_uml_class_diagram.png)](media/final_uml_class_diagram.png)
+
 ## Lutemon Types
 
 Each Lutemon type has unique base stats:
