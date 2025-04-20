@@ -1,27 +1,37 @@
 {
   "white": {
-    "idle":  { "file": "white_idle.png",  "cols": 7, "rows": 1, "frameDuration": 0.50 },
-    "walk":  { "file": "white_walk.png",  "cols": 8, "rows": 1, "frameDuration": 0.10 },
-    "attack":{ "file": "white_atk.png",   "cols": 6, "rows": 2, "frameDuration": 0.12 }
+    "idle":  { "file": "white_idle.png",  "cols": 7, "rows": 1, "frameDuration": 0.15 },
+    "run":  { "file": "white_run.png",  "cols": 8, "rows": 1, "frameDuration": 0.08 },
+    "attack":{ "file": "white_atk.png",   "cols": 10, "rows": 1, "frameDuration": 0.05 },
+    "hurt":{ "file": "white_hurt.png",   "cols": 5, "rows": 1, "frameDuration": 0.07 },
+    "die":{ "file": "white_die.png",   "cols": 15, "rows": 1, "frameDuration": 0.10 }
   },
   "green": {
-    "idle":  { "file": "green_idle.png",  "cols": 8, "rows": 1, "frameDuration": 0.50 },
-    "walk":  { "file": "green_walk.png",  "cols": 8, "rows": 1, "frameDuration": 0.10 },
-    "attack":{ "file": "green_atk.png",   "cols": 6, "rows": 2, "frameDuration": 0.12 }
+    "idle":  { "file": "green_idle.png",  "cols": 8, "rows": 1, "frameDuration": 0.15 },
+    "run": { "file": "green_run.png",   "cols": 7, "rows": 1, "frameDuration": 0.08 },
+    "attack":{ "file": "green_atk.png",   "cols": 6, "rows": 2, "frameDuration": 0.05 },
+    "hurt":{ "file": "green_hurt.png",   "cols": 4, "rows": 1, "frameDuration": 0.07 },
+    "die":{ "file": "green_die.png",   "cols": 9, "rows": 1, "frameDuration": 0.10 }
   },
   "pink": {
-    "idle":  { "file": "pink_idle.png",   "cols": 5, "rows": 1, "frameDuration": 0.50 },
-    "walk":  { "file": "pink_walk.png",   "cols": 8, "rows": 1, "frameDuration": 0.10 },
-    "attack":{ "file": "pink_atk.png",    "cols": 6, "rows": 2, "frameDuration": 0.12 }
+    "idle":  { "file": "pink_idle.png",   "cols": 5, "rows": 1, "frameDuration": 0.15 },
+    "run": { "file": "pink_run.png",   "cols": 8, "rows": 1, "frameDuration": 0.08 },
+    "attack":{ "file": "pink_atk.png",   "cols": 6, "rows": 2, "frameDuration": 0.05 },
+    "hurt":{ "file": "pink_hurt.png",   "cols": 4, "rows": 1, "frameDuration": 0.07 },
+    "die":{ "file": "pink_die.png",   "cols": 15, "rows": 1, "frameDuration": 0.10 }
   },
   "orange": {
-    "idle":  { "file": "orange_idle.png", "cols": 8, "rows": 1, "frameDuration": 0.50 },
-    "walk":  { "file": "orange_walk.png", "cols": 8, "rows": 1, "frameDuration": 0.10 },
-    "attack":{ "file": "orange_atk.png",  "cols": 6, "rows": 2, "frameDuration": 0.12 }
+    "idle":  { "file": "orange_idle.png", "cols": 8, "rows": 1, "frameDuration": 0.15 },
+    "run": { "file": "orange_run.png",   "cols": 8, "rows": 1, "frameDuration": 0.08 },
+    "attack":{ "file": "orange_atk.png",   "cols": 12, "rows": 2, "frameDuration": 0.05 },
+    "hurt":{ "file": "orange_hurt.png",   "cols": 4, "rows": 1, "frameDuration": 0.07 },
+    "die":{ "file": "orange_die.png",   "cols": 17, "rows": 1, "frameDuration": 0.10 }
   },
   "black": {
-    "idle":  { "file": "black_idle.png",  "cols": 9, "rows": 1, "frameDuration": 0.50 },
-    "walk":  { "file": "black_walk.png",  "cols": 8, "rows": 1, "frameDuration": 0.10 },
-    "attack":{ "file": "black_atk.png",   "cols": 6, "rows": 2, "frameDuration": 0.12 }
+    "idle":  { "file": "black_idle.png",  "cols": 9, "rows": 1, "frameDuration": 0.15 },
+    "run": { "file": "black_run.png",   "cols": 8, "rows": 1, "frameDuration": 0.08 },
+    "attack":{ "file": "black_atk.png",   "cols": 11, "rows": 1, "frameDuration": 0.05 },
+    "hurt":{ "file": "black_hurt.png",   "cols": 5, "rows": 1, "frameDuration": 0.07 },
+    "die":{ "file": "black_die.png",   "cols": 12, "rows": 1, "frameDuration": 0.10 }
   }
 }

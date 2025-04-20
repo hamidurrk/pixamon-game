@@ -17,7 +17,7 @@ public class Battle {
 
     /**
      * Creates a new battle between two Lutemons.
-     * 
+     *
      * @param playerLutemon The player's Lutemon
      * @param enemyLutemon The enemy Lutemon
      */
@@ -32,7 +32,7 @@ public class Battle {
 
     /**
      * Updates the battle state based on elapsed time.
-     * 
+     *
      * @param delta Time elapsed since last update
      */
     public void update(float delta) {
@@ -51,7 +51,7 @@ public class Battle {
 
     /**
      * Performs an action based on the player's input.
-     * 
+     *
      * @param action Action name ("ATTACK", "DEFEND", or "SPECIAL")
      */
     public void performAction(String action) {
@@ -72,7 +72,7 @@ public class Battle {
 
     /**
      * Performs a battle action for the player.
-     * 
+     *
      * @param action The action to perform
      */
     public void performPlayerAction(BattleAction action) {
@@ -108,25 +108,27 @@ public class Battle {
 
     /**
      * Performs an attack action.
-     * 
+     *
      * @param attacker The attacking Lutemon
      * @param defender The defending Lutemon
      */
     private void performAttack(Lutemon attacker, Lutemon defender) {
         // Add some randomness to damage
         float randomFactor = 0.8f + random.nextFloat() * 0.4f;
-        int damage = (int) (attacker.getStats().getEffectiveAttack() * randomFactor);
+        int damage = (int) (attacker.getAttackDamage() * randomFactor);
         defender.takeDamage(damage);
-        attacker.recordBattle(true);
 
+        // Record battle stats if this is a finishing blow
         if (!defender.isAlive()) {
+            attacker.recordBattle(true);
+            defender.recordBattle(false);
             state = BattleState.FINISHED;
         }
     }
 
     /**
      * Performs a defend action.
-     * 
+     *
      * @param defender The defending Lutemon
      */
     private void performDefend(Lutemon defender) {
@@ -136,16 +138,22 @@ public class Battle {
 
     /**
      * Performs a special attack action.
-     * 
+     *
      * @param attacker The attacking Lutemon
      * @param defender The defending Lutemon
      */
     private void performSpecial(Lutemon attacker, Lutemon defender) {
         // Special attack with higher damage but lower accuracy
         if (random.nextFloat() < 0.7f) {
-            int damage = (int) (attacker.getStats().getEffectiveAttack() * 1.5f);
+            int damage = (int) (attacker.getAttackDamage() * 1.5f);
             defender.takeDamage(damage);
-            attacker.recordBattle(true);
+
+            // Check if this was a finishing blow
+            if (!defender.isAlive()) {
+                attacker.recordBattle(true);
+                defender.recordBattle(false);
+                state = BattleState.FINISHED;
+            }
         }
     }
 
@@ -156,11 +164,21 @@ public class Battle {
         state = BattleState.IN_PROGRESS;
     }
 
-    // Getters
+    // Getters and setters
     public BattleState getState() { return state; }
+
+    /**
+     * Sets the battle state.
+     *
+     * @param newState The new battle state
+     */
+    public void setState(BattleState newState) {
+        this.state = newState;
+    }
+
     public boolean isPlayerTurn() { return isPlayerTurn; }
     public Lutemon getPlayerLutemon() { return playerLutemon; }
     public Lutemon getEnemyLutemon() { return enemyLutemon; }
     public float getTurnTimer() { return turnTimer; }
     public float getTurnDuration() { return TURN_DURATION; }
-} 
+}
